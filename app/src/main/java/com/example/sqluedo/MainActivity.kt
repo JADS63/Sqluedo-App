@@ -20,8 +20,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             SQLuedoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+//                    Greeting(
+//                        name = "Android",
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+                    LunchedPrint(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -38,10 +41,19 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     SQLuedoTheme {
         Greeting("Android")
     }
+}
+
+@Preview()
+@Composable
+fun LunchedPrint(modifier: Modifier = Modifier) {
+    Text(
+        text = "Bienvenue sur SQLuedo !!!",
+        modifier = modifier
+    )
 }
