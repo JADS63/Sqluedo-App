@@ -22,9 +22,7 @@ fun SQLuedoNavigation() {
         composable(route = "home") {
             HomeScreen(
                 enquetes = enquetes,
-                onEnqueteClick = { enquete ->
 
-                }
             )
         }
     }
