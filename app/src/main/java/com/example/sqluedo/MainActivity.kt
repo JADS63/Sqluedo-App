@@ -4,13 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.sqluedo.navigation.SQLuedoNavigation
 import com.example.sqluedo.ui.theme.SQLuedoTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,41 +13,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SQLuedoTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-                    LunchedPrint(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                SQLuedoNavigation()
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-//@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SQLuedoTheme {
-        Greeting("Android")
-    }
-}
-
-@Preview()
-@Composable
-fun LunchedPrint(modifier: Modifier = Modifier) {
-    Text(
-        text = "Bienvenue sur SQLuedo !!!",
-        modifier = modifier
-    )
-}
