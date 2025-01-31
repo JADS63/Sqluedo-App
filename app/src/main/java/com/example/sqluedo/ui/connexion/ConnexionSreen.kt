@@ -25,37 +25,48 @@ fun ConnectionScreen(){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         affichageEnTete()
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(100.dp))
         affichageLabel()
-        Spacer(modifier = Modifier.height(24.dp))
-        affichageBoutons()
+        Spacer(modifier = Modifier.height(100.dp))
+        affichageBoutonsConnexion()
     }
 }
-
 @Composable
 fun affichageEnTete(){
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.retour),
-            contentDescription = stringResource(id = R.string.image),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(16.dp))
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Image(
-            painter = painterResource(id = R.drawable.connexion_moyen),
-            contentDescription = stringResource(id = R.string.image),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(160.dp)
-                .clip(RoundedCornerShape(16.dp))
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.retour),
+                contentDescription = stringResource(id = R.string.image),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            )
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        Spacer(modifier = Modifier.height(100.dp))
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ){
+            Image(
+                painter = painterResource(id = R.drawable.connexion),
+                contentDescription = stringResource(id = R.string.image),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(160.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            )
+        }
     }
 }
+
 
 @Composable
 fun affichageLabel(){
@@ -82,7 +93,7 @@ fun affichageLabel(){
 }
 
 @Composable
-fun affichageBoutons(){
+fun affichageBoutonsConnexion(){
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -91,13 +102,13 @@ fun affichageBoutons(){
             onClick = {},
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.nom))
+            Text(text = stringResource(id = R.string.NouveauCompte))
         }
         OutlinedButton(
             onClick = {},
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.mdp))
+            Text(text = stringResource(id = R.string.SeConnecter))
         }
     }
 }
