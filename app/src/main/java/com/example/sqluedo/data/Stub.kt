@@ -1,26 +1,84 @@
 package com.example.sqluedo.data
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+
 object Stub {
     val enquetes = listOf(
         Enquete(
+            id = "E001",
             nom = "Enquête n1",
-            description = "Analyse de la satisfaction des clients pour le trimestre en cours."
+            description = "Analyse de la satisfaction des clients pour le trimestre en cours.",
+            difficulteIntermediare = 3,
+            difficulteDificile = 5,
+            solution = "Solution de l'enquête n1",
+            indice = "Indice de l'enquête n1",
+            nomDatabase = "Database1"
         ),
         Enquete(
+            id = "E002",
             nom = "Enquête n2",
-            description = "Étude des méthodes de travail et de l'efficacité au sein de l'équipe."
+            description = "Étude des méthodes de travail et de l'efficacité au sein de l'équipe.",
+            difficulteIntermediare = 2,
+            difficulteDificile = 4,
+            solution = "Solution de l'enquête n2",
+            indice = "Indice de l'enquête n2",
+            nomDatabase = "Database2"
         ),
         Enquete(
+            id = "E003",
             nom = "Enquête n3",
-            description = "Évaluation de l'utilisation des ressources matérielles et humaines."
+            description = "Évaluation de l'utilisation des ressources matérielles et humaines.",
+            difficulteIntermediare = 4,
+            difficulteDificile = 6,
+            solution = "Solution de l'enquête n3",
+            indice = "Indice de l'enquête n3",
+            nomDatabase = "Database3"
         ),
         Enquete(
+            id = "E004",
             nom = "Enquête n4",
-            description = "Analyse des tendances du marché et des opportunités pour l'année 2025."
+            description = "Analyse des tendances du marché et des opportunités pour l'année 2025.",
+            difficulteIntermediare = 3,
+            difficulteDificile = 5,
+            solution = "Solution de l'enquête n4",
+            indice = "Indice de l'enquête n4",
+            nomDatabase = "Database4"
         ),
         Enquete(
+            id = "E005",
             nom = "Enquête n5",
-            description = "Étude des canaux de communication et de leur efficacité au sein de l'entreprise."
+            description = "Étude des canaux de communication et de leur efficacité au sein de l'entreprise.",
+            difficulteIntermediare = 2,
+            difficulteDificile = 4,
+            solution = "Solution de l'enquête n5",
+            indice = "Indice de l'enquête n5",
+            nomDatabase = "Database5"
         )
+    )
+
+    var utilisateur1 = Utilisateur(
+        nomUtilisateur = "Utilisateur1",
+        nomGroupe = null,
+        mdp = "userpass",
+        role = "Membre"
+    )
+
+    var groupe1 = Groupe(
+        nom = "Groupe A",
+        code = "GA123",
+        nbUtilisateur = 10,
+        nomCreator = utilisateur1
+    )
+    init {
+        utilisateur1.nomGroupe = groupe1
+    }
+    val statistiques = Statistiques(
+        idStatistique = "S001",
+        nomUtilisateur = utilisateur1,
+        idEnquete = enquetes.first(),
+        nbTentatives = 3,
+        reussi = true,
+        tempsPasse = 120
     )
 }

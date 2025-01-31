@@ -1,6 +1,15 @@
 package com.example.sqluedo.data
 
+import android.media.Image
+
 data class Enquete(
+    val id: String,
     val nom: String,
-    val description: String
+    val description: String,
+    val difficulteIntermediare: Int,
+    val difficulteDificile: Int,
+//    val mld: Image,
+    val solution:String,
+    val indice:String,
+    val nomDatabase:String,
 )

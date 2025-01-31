@@ -2,5 +2,7 @@
     <string name="app_name">SQLuedo</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="image">Image</string>
+    <string name="nom">Nom</string>
+    <string name="mdp">Mot de pass</string>
 
 </resources>
