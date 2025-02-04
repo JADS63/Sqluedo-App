@@ -24,6 +24,7 @@ fun ConnectionScreen(navController: NavController){
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(30.dp))
         affichageEnTete(navController)
         Spacer(modifier = Modifier.height(100.dp))
         affichageLabel()

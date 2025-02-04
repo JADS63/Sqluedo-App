@@ -21,6 +21,7 @@ fun InscriptionScreen(navController: NavController){
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(30.dp))
         affichageEnTete(navController)
         Text(
             text = "Nouveau Compte",
