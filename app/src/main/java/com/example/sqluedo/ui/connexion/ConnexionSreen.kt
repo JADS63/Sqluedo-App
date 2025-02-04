@@ -13,26 +13,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.sqluedo.R
 
-@Preview(showBackground = true)
 @Composable
-fun ConnectionScreen(){
+fun ConnectionScreen(navController: NavController){
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        affichageEnTete()
+        affichageEnTete(navController)
         Spacer(modifier = Modifier.height(100.dp))
         affichageLabel()
         Spacer(modifier = Modifier.height(100.dp))
-        affichageBoutonsConnexion()
+        affichageBoutonsConnexion(navController)
     }
 }
 @Composable
-fun affichageEnTete(){
+fun affichageEnTete(navController: NavController){
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -40,14 +40,20 @@ fun affichageEnTete(){
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.retour),
-                contentDescription = stringResource(id = R.string.image),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
+            IconButton(
+                onClick = { navController.navigate("home") },
+                modifier = Modifier.padding(bottom = 24.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.retour),
+                    contentDescription = stringResource(id = R.string.image),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+
             Spacer(modifier = Modifier.weight(1f))
         }
         Spacer(modifier = Modifier.height(100.dp))
@@ -93,13 +99,13 @@ fun affichageLabel(){
 }
 
 @Composable
-fun affichageBoutonsConnexion(){
+fun affichageBoutonsConnexion(navController: NavController){
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Button(
-            onClick = {},
+            onClick = { navController.navigate("inscription") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = stringResource(id = R.string.NouveauCompte))

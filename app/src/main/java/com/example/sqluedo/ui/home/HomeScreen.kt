@@ -28,17 +28,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sqluedo.data.Enquete
 import com.example.sqluedo.R
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun HomeScreen(
+    navController: NavController,
     enquetes: List<Enquete>
 ) {
     var selectedEnquete by remember { mutableStateOf<Enquete?>(null) }
 
     Column {
-
         if (selectedEnquete == null) {
-            AffichageBoutonNavigation()
+            AffichageBoutonNavigation(navController = navController)
             AffichageAllEnquetes(
                 enquetes = enquetes.sortedBy { it.nom },
                 onEnqueteClick = { enquete ->
@@ -54,22 +56,20 @@ fun HomeScreen(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun AffichageBoutonNavigation(){
+fun AffichageBoutonNavigation(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Spacer(modifier = Modifier.height(22.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.livre),
                 contentDescription = stringResource(id = R.string.image),
@@ -78,14 +78,19 @@ fun AffichageBoutonNavigation(){
                     .size(48.dp)
                     .clip(RoundedCornerShape(16.dp))
             )
-            Image(
-                painter = painterResource(id = R.drawable.connexion_moyen),
-                contentDescription = stringResource(id = R.string.image),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
+            IconButton(
+                onClick = { navController.navigate("connexion") },
+                modifier = Modifier.padding(bottom = 24.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.connexion_moyen),
+                    contentDescription = stringResource(id = R.string.image),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
         }
         Spacer(modifier = Modifier.height(64.dp))
 
@@ -133,10 +138,7 @@ fun AffichageEnquetes(
             .padding(8.dp)
             .clickable { onClick() }
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = enquete.nom,
                 fontSize = 20.sp,
@@ -165,18 +167,16 @@ fun AffichageEnqueteClickee(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Spacer(modifier = Modifier.height(22.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
+        ) {
             IconButton(
                 onClick = onBack,
-                modifier = Modifier
-                    .padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.retour),
@@ -187,6 +187,7 @@ fun AffichageEnqueteClickee(
                         .clip(RoundedCornerShape(16.dp))
                 )
             }
+
             Image(
                 painter = painterResource(id = R.drawable.connexion_moyen),
                 contentDescription = stringResource(id = R.string.image),
@@ -197,8 +198,6 @@ fun AffichageEnqueteClickee(
             )
         }
         Spacer(modifier = Modifier.height(64.dp))
-
-
 
         Text(
             text = enquete.nom,
@@ -247,16 +246,14 @@ fun AffichageEnqueteClickee(
                 painter = painterResource(id = R.drawable.mcd),
                 contentDescription = stringResource(id = R.string.image),
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
         }
         Spacer(modifier = Modifier.height(100.dp))
 
         Button(
             onClick = {  },
-            modifier = Modifier
-                .padding(2.dp)
+            modifier = Modifier.padding(2.dp)
         ) {
             Text(
                 text = "Jouer",
@@ -265,4 +262,13 @@ fun AffichageEnqueteClickee(
             )
         }
     }
+}
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAffichageBoutonNavigation() {
+    val navController = rememberNavController()
+    AffichageBoutonNavigation(navController = navController)
 }

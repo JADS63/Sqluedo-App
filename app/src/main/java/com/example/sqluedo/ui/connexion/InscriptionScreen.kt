@@ -10,18 +10,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.sqluedo.R
 
-@Preview(showBackground = true)
 @Composable
-fun InscriptionScreen(){
+fun InscriptionScreen(navController: NavController){
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        affichageEnTete()
+        affichageEnTete(navController)
         Text(
             text = "Nouveau Compte",
             fontSize = 24.sp,
