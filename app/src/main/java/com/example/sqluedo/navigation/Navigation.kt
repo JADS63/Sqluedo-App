@@ -16,6 +16,7 @@ import com.example.sqluedo.ui.connexion.ConnectionScreen
 import com.example.sqluedo.ui.connexion.InscriptionScreen
 import com.example.sqluedo.ui.home.EnqueteScreen
 import com.example.sqluedo.ui.home.HomeScreen
+import com.example.sqluedo.ui.jeu.JeuScreen
 
 @Composable
 fun SQLuedoNavigation() {
@@ -54,6 +55,23 @@ fun SQLuedoNavigation() {
             val enquete = enquetes.find { it.id == enqueteId }
             if (enquete != null) {
                 EnqueteScreen(
+                    enquete = enquete,
+                    navController = navController
+                )
+            } else {
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+            }
+        }
+        composable(
+            route = "jeu/{enqueteId}",
+            arguments = listOf(navArgument("enqueteId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val enqueteId = backStackEntry.arguments?.getString("enqueteId")
+            val enquete = enquetes.find { it.id == enqueteId }
+            if (enquete != null) {
+                JeuScreen(
                     enquete = enquete,
                     navController = navController
                 )

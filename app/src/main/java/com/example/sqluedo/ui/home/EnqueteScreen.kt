@@ -40,7 +40,6 @@ fun EnqueteScreen(
     navController: NavController,
     enquete: Enquete
 ){
-
     AffichageEnqueteClickee(
         enquete=enquete,
         navController =navController
@@ -149,7 +148,7 @@ fun AffichageEnqueteClickee(
         Spacer(modifier = Modifier.height(100.dp))
 
         Button(
-            onClick = {  },
+            onClick = {navController.navigate("enquete/${enquete.id}")},
             modifier = Modifier.padding(2.dp)
         ) {
             Text(
