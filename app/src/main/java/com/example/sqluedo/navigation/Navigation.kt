@@ -18,6 +18,11 @@ import com.example.sqluedo.ui.home.EnqueteScreen
 import com.example.sqluedo.ui.home.HomeScreen
 import com.example.sqluedo.ui.jeu.JeuScreen
 
+object Home;
+object Connexion;
+object Inscription;
+object Informations;
+object Jeu;
 @Composable
 fun SQLuedoNavigation() {
     val navController = rememberNavController()
