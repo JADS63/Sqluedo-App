@@ -89,7 +89,7 @@ fun AffichageEnteteJeu(navController: NavController){
                 )
             }
             IconButton(
-                onClick = { navController.navigate("connexion") },
+                onClick = {false},
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(

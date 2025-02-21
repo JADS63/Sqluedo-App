@@ -148,7 +148,7 @@ fun AffichageEnqueteClickee(
         Spacer(modifier = Modifier.height(100.dp))
 
         Button(
-            onClick = {navController.navigate("enquete/${enquete.id}")},
+            onClick = {navController.navigate("jeu/${enquete.id}")},
             modifier = Modifier.padding(2.dp)
         ) {
             Text(
