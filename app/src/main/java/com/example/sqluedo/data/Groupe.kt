@@ -1,7 +1,8 @@
 package com.example.sqluedo.data
 
-import android.os.Parcelable.Creator
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Groupe(
     val nom: String,
     val code: String,

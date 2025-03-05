@@ -1,9 +1,7 @@
 package com.example.sqluedo.ui.jeu
 
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,12 +44,13 @@ import com.example.sqluedo.ui.home.AffichageBoutonNavigation
 
 @Composable
 fun JeuScreen(
-    navController: NavController,
+    goHome:()-> Unit,
+    goResultat:()-> Unit,
     enquete: Enquete
 ) {
     Column {
         Spacer(modifier = Modifier.height(30.dp))
-        AffichageEnteteJeu(navController = navController)
+        AffichageEnteteJeu(goHome)
         AffichageBloc();
         AffichageRequete();
         AffichageResultat();
@@ -63,7 +62,7 @@ fun JeuScreen(
 }
 
 @Composable
-fun AffichageEnteteJeu(navController: NavController){
+fun AffichageEnteteJeu(goHome:()-> Unit){
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,7 +75,7 @@ fun AffichageEnteteJeu(navController: NavController){
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
-                onClick = { navController.navigate("home") },
+                onClick = goHome,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(

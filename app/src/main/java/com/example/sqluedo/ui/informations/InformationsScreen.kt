@@ -33,4 +33,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.sqluedo.R
 import com.example.sqluedo.data.Enquete
+import com.example.sqluedo.data.Statistiques
+import com.example.sqluedo.data.Utilisateur
+import com.example.sqluedo.navigation.Informations
+import com.example.sqluedo.navigation.Inscription
 
+@Composable
+fun InformationsScreen(
+    user: Utilisateur,
+    stat: Statistiques,
+    goHome:()-> Unit
+){
+
+}

@@ -1,5 +1,6 @@
 package com.example.sqluedo.ui.home
 
+import android.telecom.Connection
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -31,22 +32,23 @@ import androidx.navigation.NavController
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    enquetes: List<Enquete>
+    goConnexion:()->Unit,
+    goEnquete: ()->Unit,
+    enquetes: List<Enquete>,
 ) {
     Column {
         Spacer(modifier = Modifier.height(30.dp))
 
-        AffichageBoutonNavigation(navController = navController)
+        AffichageBoutonNavigation(goConnexion)
         AffichageAllEnquetes(
             enquetes = enquetes.sortedBy { it.nom },
-            navController = navController
+            goEnquete
         )
     }
 }
 
 @Composable
-fun AffichageBoutonNavigation(navController: NavController) {
+fun AffichageBoutonNavigation(goConnexion:()->Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -67,7 +69,7 @@ fun AffichageBoutonNavigation(navController: NavController) {
                     .clip(RoundedCornerShape(16.dp))
             )
             IconButton(
-                onClick = { navController.navigate("connexion") },
+                onClick = goConnexion,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
@@ -93,7 +95,7 @@ fun AffichageBoutonNavigation(navController: NavController) {
 @Composable
 fun AffichageAllEnquetes(
     enquetes: List<Enquete>,
-    navController: NavController
+    goEnquete: ()->Unit,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(32.dp),
@@ -102,7 +104,7 @@ fun AffichageAllEnquetes(
         items(enquetes) { enquete ->
             AffichageEnquetes(
                 enquete = enquete,
-                navController = navController
+                goEnquete =goEnquete
             )
         }
     }
@@ -111,7 +113,7 @@ fun AffichageAllEnquetes(
 @Composable
 fun AffichageEnquetes(
     enquete: Enquete,
-    navController: NavController
+    goEnquete: ()->Unit
 ) {
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(
@@ -124,7 +126,7 @@ fun AffichageEnquetes(
             .wrapContentHeight()
             .padding(8.dp)
             .clickable {
-                navController.navigate("enquete/${enquete.id}")
+                goEnquete
             }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

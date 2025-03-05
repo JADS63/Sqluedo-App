@@ -1,5 +1,8 @@
 package com.example.sqluedo.data
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Statistiques(
     val idStatistique: String,
     val nomUtilisateur: Utilisateur,

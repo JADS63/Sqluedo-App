@@ -1,5 +1,6 @@
 package com.example.sqluedo.ui.connexion
 
+import android.telecom.Connection
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,7 +15,9 @@ import androidx.navigation.NavController
 import com.example.sqluedo.R
 
 @Composable
-fun InscriptionScreen(navController: NavController){
+fun InscriptionScreen(
+    goConnection: ()->Unit
+){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -22,7 +25,7 @@ fun InscriptionScreen(navController: NavController){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(30.dp))
-        affichageEnTete(navController)
+        affichageEnTete(goConnection)
         Text(
             text = "Nouveau Compte",
             fontSize = 24.sp,

@@ -17,7 +17,11 @@ import androidx.navigation.NavController
 import com.example.sqluedo.R
 
 @Composable
-fun ConnectionScreen(navController: NavController){
+fun ConnectionScreen(
+    goHome:()->Unit,
+    goInscription:()->Unit
+
+){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -25,15 +29,15 @@ fun ConnectionScreen(navController: NavController){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(30.dp))
-        affichageEnTete(navController)
+        affichageEnTete(goHome)
         Spacer(modifier = Modifier.height(100.dp))
         affichageLabel()
         Spacer(modifier = Modifier.height(100.dp))
-        affichageBoutonsConnexion(navController)
+        affichageBoutonsConnexion(goInscription)
     }
 }
 @Composable
-fun affichageEnTete(navController: NavController){
+fun affichageEnTete(goHome:()->Unit){
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -42,7 +46,7 @@ fun affichageEnTete(navController: NavController){
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { navController.navigate("home") },
+                onClick =goHome,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
@@ -100,13 +104,13 @@ fun affichageLabel(){
 }
 
 @Composable
-fun affichageBoutonsConnexion(navController: NavController){
+fun affichageBoutonsConnexion(goInscription:()->Unit){
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Button(
-            onClick = { navController.navigate("inscription") },
+            onClick = goInscription,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = stringResource(id = R.string.NouveauCompte))

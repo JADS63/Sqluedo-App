@@ -1,7 +1,8 @@
 package com.example.sqluedo.data
 
-import android.media.Image
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Enquete(
     val id: String,
     val nom: String,

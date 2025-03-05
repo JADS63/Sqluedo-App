@@ -1,5 +1,6 @@
 package com.example.sqluedo.ui.home
 
+import android.telecom.Connection
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -37,19 +38,25 @@ import com.example.sqluedo.data.Enquete
 
 @Composable
 fun EnqueteScreen(
-    navController: NavController,
+    goHome:()-> Unit,
+    goJeu:()-> Unit,
+    goConnection:()-> Unit,
     enquete: Enquete
 ){
     AffichageEnqueteClickee(
-        enquete=enquete,
-        navController =navController
+        enquete,
+        goHome,
+        goJeu,
+        goConnection
     )
 }
 
 @Composable
 fun AffichageEnqueteClickee(
     enquete: Enquete,
-    navController: NavController
+    goHome:()-> Unit,
+    goJeu:()-> Unit,
+    goConnection:()-> Unit
 ) {
     Column(
         modifier = Modifier
@@ -64,7 +71,7 @@ fun AffichageEnqueteClickee(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
-                onClick = {navController.navigate("home")},
+                onClick = goHome,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
@@ -78,7 +85,7 @@ fun AffichageEnqueteClickee(
             }
 
             IconButton(
-                onClick = { navController.navigate("connexion") },
+                onClick =goConnection,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
@@ -148,7 +155,7 @@ fun AffichageEnqueteClickee(
         Spacer(modifier = Modifier.height(100.dp))
 
         Button(
-            onClick = {navController.navigate("jeu/${enquete.id}")},
+            onClick = goJeu,
             modifier = Modifier.padding(2.dp)
         ) {
             Text(
