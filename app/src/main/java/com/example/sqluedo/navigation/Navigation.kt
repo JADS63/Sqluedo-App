@@ -41,6 +41,9 @@ object Enquete
 fun SQLuedoNavigation() {
     val navController = rememberNavController()
     val enquetes = Stub.enquetes
+    val statistiques= Stub.statistiques
+    val utilisateur=Stub.utilisateur1
+    val groupe=Stub.groupe1
 
     NavHost(
         modifier = Modifier.fillMaxSize(),
@@ -57,16 +60,16 @@ fun SQLuedoNavigation() {
             InscriptionScreen(goConnection ={navController.navigate(Connexion)})
         }
         composable<Informations> {
-            InformationsScreen(user = Null, stat = Null, goHome = {navController.navigate(Home)})
+            InformationsScreen(user = , stat = statistiques, goHome = {navController.navigate(Home)})
         }
         composable<Jeu> {
-            JeuScreen(goHome = {navController.navigate(Home)}, goResultat = {navController.navigate(Resultat)}, enquete = Null)
+            JeuScreen(goHome = {navController.navigate(Home)}, goResultat = {navController.navigate(Resultat)}, enquete = )
         }
         composable<Resultat> {
-            ResultatScreen(enquete = Null, goHome = {navController.navigate((Home))})
+            ResultatScreen(enquete = , goHome = {navController.navigate((Home))})
         }
         composable<Enquete> {
-            ResultatScreen(enquete = Null, goHome = {navController.navigate((Home))})
+            ResultatScreen(enquete = , goHome = {navController.navigate((Home))})
         }
 
 //        composable(

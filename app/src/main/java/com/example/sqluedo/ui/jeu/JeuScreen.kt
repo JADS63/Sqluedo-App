@@ -55,9 +55,6 @@ fun JeuScreen(
         AffichageRequete();
         AffichageResultat();
         AffichageReponseValidation();
-
-
-
     }
 }
 
