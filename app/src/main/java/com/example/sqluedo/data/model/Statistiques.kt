@@ -1,4 +1,4 @@
-package com.example.sqluedo.data
+package com.example.sqluedo.data.model
 
 import kotlinx.serialization.Serializable
 

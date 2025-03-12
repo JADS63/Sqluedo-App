@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sqluedo.R
-import com.example.sqluedo.data.Enquete
+import com.example.sqluedo.data.model.Enquete
 
 @Composable
 fun EnqueteScreen(

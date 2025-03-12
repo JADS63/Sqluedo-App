@@ -5,8 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.sqluedo.data.Enquete
-import com.example.sqluedo.data.Stub
+import com.example.sqluedo.data.model.Enquete
+import com.example.sqluedo.data.model.Stub
 import com.example.sqluedo.ui.connexion.ConnectionScreen
 import com.example.sqluedo.ui.connexion.InscriptionScreen
 import com.example.sqluedo.ui.home.HomeScreen
@@ -42,8 +42,8 @@ fun SQLuedoNavigation() {
     val navController = rememberNavController()
     val enquetes = Stub.enquetes
     val statistiques= Stub.statistiques
-    val utilisateur=Stub.utilisateur1
-    val groupe=Stub.groupe1
+    val utilisateur= Stub.utilisateur1
+    val groupe= Stub.groupe1
 
     NavHost(
         modifier = Modifier.fillMaxSize(),
@@ -52,7 +52,7 @@ fun SQLuedoNavigation() {
     ) {
         composable<Home>{
             HomeScreen(enquetes = enquetes, goConnexion = {navController.navigate(Connexion)}, goEnquete = {navController.navigate(Enquete)})
-        }
+        };
         composable<Connexion>{
             ConnectionScreen(goHome ={navController.navigate(Home)},goInscription={navController.navigate(Inscription)})
         }

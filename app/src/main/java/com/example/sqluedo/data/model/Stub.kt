@@ -1,7 +1,4 @@
-package com.example.sqluedo.data
-
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+package com.example.sqluedo.data.model
 
 object Stub {
     val enquetes = listOf(
@@ -64,7 +61,7 @@ object Stub {
         role = "Membre"
     )
 
-    var groupe1 = Groupe(
+    var groupe1 = Group(
         nom = "Groupe A",
         code = "GA123",
         nbUtilisateur = 10,
