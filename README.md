@@ -90,7 +90,7 @@ Ce document énumère les fonctionnalités et corrections à implémenter avant 
 
 ## 📆 Priorités suggérées
 
-1. **Haute priorité** : Corriger la navigation et compléter les écrans vides
+1. **Haute priorité** : Corriger la navigation
 2. **Moyenne priorité** : Implémenter les repositories et ViewModels
 3. **Moyenne priorité** : Connecter l'application à l'API 
 4. **Basse priorité** : Optimisations et préparation au déploiement
