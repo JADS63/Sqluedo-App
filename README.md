@@ -12,10 +12,6 @@ Ce document énumère les fonctionnalités et corrections à implémenter avant 
  - Mettre à jour la navigation pour utiliser la même structure que dans `Navigation.kt avec notation exacte`
  - Implémenter la gestion des arguments pour les enquêtes sélectionnées
 
-### Interface utilisateur
-- Finaliser les écrans partiellement implémentés :
- - Compléter `ResultatScreen.kt` qui est actuellement vide
- - Implémenter l'interface utilisateur complète pour `InformationsScreen.kt`
 
 ## 🚀 Développement des fonctionnalités
 
@@ -38,7 +34,6 @@ Ce document énumère les fonctionnalités et corrections à implémenter avant 
 - Authentification :
  - Implémenter la logique de connexion utilisateur
  - Implémenter la logique d'inscription utilisateur
- - Ajouter la validation des formulaires
 
 - Gestion des groupes :
  - Fonctionnalité pour créer un groupe
@@ -106,10 +101,10 @@ Ce document énumère les fonctionnalités et corrections à implémenter avant 
 
 | Catégorie | Progression |
 |-----------|-------------|
-| Navigation | 60% |
-| UI/UX | 70% |
+| Navigation | 80% |
+| UI/UX | 95% |
 | Repositories | 10% |
 | ViewModels | 10% |
 | Services API | 40% |
 | Fonctionnalités de jeu | 50% |
-| Tests | 5% |
+| Tests | 0% |
