@@ -13,15 +13,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.sqluedo.R
 
 @Composable
 fun ConnectionScreen(
-    goHome:()->Unit,
-    goInscription:()->Unit
-
-){
+    goHome: () -> Unit,
+    goInscription: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,8 +34,9 @@ fun ConnectionScreen(
         affichageBoutonsConnexion(goInscription)
     }
 }
+
 @Composable
-fun affichageEnTete(goHome:()->Unit){
+fun affichageEnTete(goHome: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -46,12 +45,12 @@ fun affichageEnTete(goHome:()->Unit){
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick =goHome,
+                onClick = goHome,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.retour),
-                    contentDescription = stringResource(id = R.string.image),
+                    contentDescription = stringResource(id = R.string.btn_retour),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(48.dp)
@@ -65,7 +64,7 @@ fun affichageEnTete(goHome:()->Unit){
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
-        ){
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.connexion),
                 contentDescription = stringResource(id = R.string.image),
@@ -78,9 +77,8 @@ fun affichageEnTete(goHome:()->Unit){
     }
 }
 
-
 @Composable
-fun affichageLabel(){
+fun affichageLabel() {
     var nom by remember { mutableStateOf("") }
     var mdp by remember { mutableStateOf("") }
 
@@ -104,7 +102,7 @@ fun affichageLabel(){
 }
 
 @Composable
-fun affichageBoutonsConnexion(goInscription:()->Unit){
+fun affichageBoutonsConnexion(goInscription: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -121,5 +119,16 @@ fun affichageBoutonsConnexion(goInscription:()->Unit){
         ) {
             Text(text = stringResource(id = R.string.SeConnecter))
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ConnectionScreenPreview() {
+    MaterialTheme {
+        ConnectionScreen(
+            goHome = {},
+            goInscription = {}
+        )
     }
 }

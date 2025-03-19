@@ -1,24 +1,58 @@
 package com.example.sqluedo.data.repository
 import com.example.sqluedo.data.model.Enquete
 import com.example.sqluedo.data.service.CodeFirstService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
-suspend fun loadEnquetesProgress(
-    service: CodeFirstService,
-    updateProgress:suspend (List<Enquete>) -> Unit
-): List<Enquete> {
-    val request = service.listEnquetesSuspend()
-    updateProgress(request)
-    return request
-}
+class EnqueteRepository(private val service: CodeFirstService) {
 
-suspend fun loadEnqueteByName(
-    service: CodeFirstService,
-    enqueueName: String
-): Enquete? {
-    return try {
-        service.enqueteParNomSuspend(enqueueName)
-    } catch (e: Exception) {
-        println("Erreur lors de la récupération de l'enquête par nom: ${e.message}")
-        null
+    fun getEnquetes(index: Int = 0, count: Int = 10): Flow<List<Enquete>> = flow {
+        try {
+            val enquetes = service.listEnquetesSuspend(index, count)
+            emit(enquetes)
+        } catch (e: Exception) {
+            emit(emptyList())
+            println("Erreur lors de la récupération des enquêtes: ${e.message}")
+        }
     }
+
+    // Récupère une enquête par son ID
+//    suspend fun getEnqueteById(id: String): Enquete? {
+//        return try {
+//            service.enqueteParIdSuspend(id)
+//        } catch (e: Exception) {
+//            println("Erreur lors de la récupération de l'enquête par ID: ${e.message}")
+//            null
+//        }
+//    }
+//
+//    // Récupère une enquête par son nom
+//    suspend fun getEnqueteByName(name: String): Enquete? {
+//        return try {
+//            service.enqueteParNomSuspend(name)
+//        } catch (e: Exception) {
+//            println("Erreur lors de la récupération de l'enquête par nom: ${e.message}")
+//            null
+//        }
+//    }
 }
+
+//// Fonction d'extension pour convertir à l'ancien format si nécessaire (pour compatibilité)
+//suspend fun loadEnquetesProgress(
+//    repository: EnqueteRepository,
+//    updateProgress: suspend (List<Enquete>) -> Unit
+//): List<Enquete> {
+//    var enquetes = emptyList<Enquete>()
+//    repository.getEnquetes().collect {
+//        enquetes = it
+//        updateProgress(it)
+//    }
+//    return enquetes
+//}
+//
+//suspend fun loadEnqueteByName(
+//    repository: EnqueteRepository,
+//    enqueteName: String
+//): Enquete? {
+//    return repository.getEnqueteByName(enqueteName)
+//}

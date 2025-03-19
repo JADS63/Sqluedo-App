@@ -7,11 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,30 +18,71 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sqluedo.data.model.Enquete
+import com.example.sqluedo.data.model.Stub
 import com.example.sqluedo.R
 
 @Composable
 fun HomeScreen(
-    goConnexion:()->Unit,
-    goEnquete: ()->Unit,
+    goConnexion: () -> Unit,
+    goEnquete: (Enquete) -> Unit,
     enquetes: List<Enquete>,
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     Column {
         Spacer(modifier = Modifier.height(30.dp))
 
         AffichageBoutonNavigation(goConnexion)
-        AffichageAllEnquetes(
-            enquetes = enquetes.sortedBy { it.nom },
-            goEnquete
-        )
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (error != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.ErrChargement),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = error,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { /* Fonctionnalité à implémenter */ }) {
+                        Text(stringResource(R.string.btn_reessayer))
+                    }
+                }
+            }
+        } else {
+            AffichageAllEnquetes(
+                enquetes = enquetes.sortedBy { it.nom },
+                goEnquete = goEnquete
+            )
+        }
     }
 }
 
 @Composable
-fun AffichageBoutonNavigation(goConnexion:()->Unit) {
+fun AffichageBoutonNavigation(goConnexion: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -58,8 +95,8 @@ fun AffichageBoutonNavigation(goConnexion:()->Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Image(
-                painter = painterResource(id = R.drawable.livre),
-                contentDescription = stringResource(id = R.string.image),
+                painter = painterResource(R.drawable.livre),
+                contentDescription = stringResource(R.string.image),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(48.dp)
@@ -70,8 +107,8 @@ fun AffichageBoutonNavigation(goConnexion:()->Unit) {
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.connexion_moyen),
-                    contentDescription = stringResource(id = R.string.image),
+                    painter = painterResource(R.drawable.connexion_moyen),
+                    contentDescription = stringResource(R.string.image),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(48.dp)
@@ -81,7 +118,7 @@ fun AffichageBoutonNavigation(goConnexion:()->Unit) {
         }
         Spacer(modifier = Modifier.height(64.dp))
         Text(
-            text = "Sqluedo",
+            text = stringResource(R.string.titre_app),
             fontSize = 48.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 24.dp)
@@ -92,17 +129,30 @@ fun AffichageBoutonNavigation(goConnexion:()->Unit) {
 @Composable
 fun AffichageAllEnquetes(
     enquetes: List<Enquete>,
-    goEnquete: ()->Unit,
+    goEnquete: (Enquete) -> Unit,
 ) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(32.dp),
-        modifier = Modifier.padding(10.dp)
-    ) {
-        items(enquetes) { enquete ->
-            AffichageEnquetes(
-                enquete = enquete,
-                goEnquete =goEnquete
+    if (enquetes.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.ErrEnqueteVide),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
             )
+        }
+    } else {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(32.dp),
+            modifier = Modifier.padding(10.dp)
+        ) {
+            items(enquetes) { enquete ->
+                AffichageEnquetes(
+                    enquete = enquete,
+                    goEnquete = goEnquete
+                )
+            }
         }
     }
 }
@@ -110,7 +160,7 @@ fun AffichageAllEnquetes(
 @Composable
 fun AffichageEnquetes(
     enquete: Enquete,
-    goEnquete: ()->Unit
+    goEnquete: (Enquete) -> Unit
 ) {
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(
@@ -123,7 +173,7 @@ fun AffichageEnquetes(
             .wrapContentHeight()
             .padding(8.dp)
             .clickable {
-                goEnquete
+                goEnquete(enquete)
             }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -142,5 +192,17 @@ fun AffichageEnquetes(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    MaterialTheme {
+        HomeScreen(
+            goConnexion = {},
+            goEnquete = {},
+            enquetes = Stub.enquetes
+        )
     }
 }

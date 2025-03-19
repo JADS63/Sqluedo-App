@@ -1,5 +1,6 @@
 package com.example.sqluedo.data.model
 
+import android.media.Image
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,7 +10,7 @@ data class Enquete(
     val description: String,
     val difficulteIntermediare: Int,
     val difficulteDificile: Int,
-//    val mld: Image,
+    //val mld: Image,
     val solution:String,
     val indice:String,
     val nomDatabase:String,

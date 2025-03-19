@@ -1,13 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Général -->
     <string name="app_name">SQLuedo</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment">Bonjour</string>
     <string name="image">Image</string>
+
+    <!-- Connexion et Authentification -->
     <string name="nom">Nom</string>
     <string name="mdp">Mot de passe</string>
     <string name="NouveauCompte">Nouveau Compte</string>
     <string name="SeConnecter">Se Connecter</string>
     <string name="CreerCompte">Créer Compte</string>
+    <string name="titre_nouveau_compte">Nouveau Compte</string>
 
+    <!-- Navigation -->
+    <string name="btn_retour">Retour</string>
+    <string name="btn_home">Accueil</string>
+    <string name="btn_valider">Valider</string>
+    <string name="btn_jouer">Jouer</string>
 
+    <!-- Écran Accueil -->
+    <string name="titre_app">Sqluedo</string>
+    <string name="ErrChargement">Erreur de chargement</string>
+    <string name="ErrEnqueteVide">Aucune enquête disponible</string>
+    <string name="btn_reessayer">Réessayer</string>
 
+    <!-- Écran Enquête -->
+    <string name="titre_description">Description</string>
+    <string name="mcd_description">Diagramme de modèle conceptuel des données</string>
+
+    <!-- Écran Jeu -->
+    <string name="label_requete">Requête</string>
+    <string name="label_resultat">Résultat</string>
+    <string name="label_reponse">Réponse</string>
+    <string name="menu">Menu</string>
+
+    <!-- Écran Groupe -->
+    <string name="btn_Groupe">Groupe</string>
+
+    <!-- Écran Informations -->
+    <string name="label_nom">Nom</string>
+    <string name="label_groupe">Groupe</string>
+    <string name="titre_statistiques">Statistiques</string>
+    <string name="badge_reussite">Badge de réussite</string>
+    <string name="text_reussite">Réussite</string>
+    <string name="pourcentage_reussite">100 %</string>
+
+    <!-- Boutons de groupe -->
+    <string name="btn_quitter_groupe">Quitter Groupe</string>
+    <string name="btn_rejoindre_groupe">Rejoindre Groupe</string>
+    <string name="btn_creer_groupe">Créer un groupe</string>
 </resources>
