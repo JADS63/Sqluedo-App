@@ -87,7 +87,7 @@ fun TopBar(goHome: () -> Unit) {
                     modifier = Modifier.size(32.dp)
                 )
             }
-            // A faire quand on aura plus de problème sur le jeu 
+            // A faire quand on aura plus de problème sur le jeu
 //            IconButton(onClick = { /* Action recherche */ }) {
 //                Icon(
 //                    painter = painterResource(id = R.drawable.menu), // Remplacer par une icône de recherche

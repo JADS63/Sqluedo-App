@@ -47,26 +47,7 @@ fun ResultatScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // En-tête avec bouton de retour
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = goHome,
-                modifier = Modifier.padding(bottom = 24.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.retour),
-                    contentDescription = stringResource(id = R.string.btn_retour),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                )
-            }
-        }
+
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -104,7 +85,6 @@ fun ResultatScreen(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // Ajoutez ici le contenu spécifique au résultat
                 Text(
                     text = "Solution de l'enquête : ${enquete.solution}",
                     textAlign = TextAlign.Center,

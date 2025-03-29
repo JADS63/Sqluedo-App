@@ -1,58 +1,59 @@
 package com.example.sqluedo.data.repository
 import com.example.sqluedo.data.model.Enquete
 import com.example.sqluedo.data.service.CodeFirstService
+import com.example.sqluedo.data.service.createLoginRequestBody
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.json.JSONObject
 
 class EnqueteRepository(private val service: CodeFirstService) {
+    private var authToken: String? = null
 
-    fun getEnquetes(index: Int = 0, count: Int = 10): Flow<List<Enquete>> = flow {
-        try {
-            val enquetes = service.listEnquetesSuspend(index, count)
-            emit(enquetes)
+    suspend fun login(email: String, password: String): Boolean {
+        return try {
+            val requestBody = createLoginRequestBody(email, password)
+            val response = service.login(requestBody)
+            val jsonResponse = JSONObject(response.string())
+            val token = jsonResponse.getString("token")
+            authToken = "Bearer $token"
+            true
         } catch (e: Exception) {
-            emit(emptyList())
-            println("Erreur lors de la récupération des enquêtes: ${e.message}")
+            println("Erreur lors de l'authentification: ${e.message}")
+            e.printStackTrace()
+            false
         }
     }
 
-    // Récupère une enquête par son ID
-//    suspend fun getEnqueteById(id: String): Enquete? {
-//        return try {
-//            service.enqueteParIdSuspend(id)
-//        } catch (e: Exception) {
-//            println("Erreur lors de la récupération de l'enquête par ID: ${e.message}")
-//            null
-//        }
-//    }
-//
-//    // Récupère une enquête par son nom
-//    suspend fun getEnqueteByName(name: String): Enquete? {
-//        return try {
-//            service.enqueteParNomSuspend(name)
-//        } catch (e: Exception) {
-//            println("Erreur lors de la récupération de l'enquête par nom: ${e.message}")
-//            null
-//        }
-//    }
-}
+    fun getEnquetes(index: Int = 0, count: Int = 3): Flow<List<Enquete>> = flow {
+        if (authToken == null) {
+            val success = login("admin@sqluedo.com", "Admin123!")
+            if (!success) {
+                emit(emptyList())
+                return@flow
+            }
+        }
 
-//// Fonction d'extension pour convertir à l'ancien format si nécessaire (pour compatibilité)
-//suspend fun loadEnquetesProgress(
-//    repository: EnqueteRepository,
-//    updateProgress: suspend (List<Enquete>) -> Unit
-//): List<Enquete> {
-//    var enquetes = emptyList<Enquete>()
-//    repository.getEnquetes().collect {
-//        enquetes = it
-//        updateProgress(it)
-//    }
-//    return enquetes
-//}
-//
-//suspend fun loadEnqueteByName(
-//    repository: EnqueteRepository,
-//    enqueteName: String
-//): Enquete? {
-//    return repository.getEnqueteByName(enqueteName)
-//}
+        try {
+            val response = service.listEnquetesSuspend(authToken!!, index, count)
+            emit(response.items)
+        } catch (e: Exception) {
+            emit(emptyList())
+            println("Erreur lors de la récupération des enquêtes: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun getTotalEnquetesCount(): Int {
+        if (authToken == null) {
+            login("admin@sqluedo.com", "Admin123!")
+        }
+
+        return try {
+            val response = service.listEnquetesSuspend(authToken!!, 0, 1)
+            response.totalCount
+        } catch (e: Exception) {
+            println("Erreur lors de la récupération du nombre total d'enquêtes: ${e.message}")
+            20
+        }
+    }
+}

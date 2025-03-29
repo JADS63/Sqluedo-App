@@ -26,7 +26,8 @@ import com.example.sqluedo.data.model.Stub
 fun InformationsScreen(
     user: Utilisateur,
     stat: Statistiques,
-    goHome: () -> Unit
+    goHome: () -> Unit,
+    goLogout: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -34,9 +35,10 @@ fun InformationsScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // En-tête avec bouton de retour et déconnexion
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
@@ -50,6 +52,17 @@ fun InformationsScreen(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(16.dp))
+                )
+            }
+
+            // Bouton de déconnexion
+            TextButton(
+                onClick = goLogout,
+                modifier = Modifier.padding(bottom = 24.dp)
+            ) {
+                Text(
+                    text = "Déconnexion",
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
@@ -240,7 +253,8 @@ fun InformationsScreenPreview() {
         InformationsScreen(
             user = utilisateur,
             stat = statistiques,
-            goHome = { }
+            goHome = { },
+            goLogout = { }
         )
     }
 }

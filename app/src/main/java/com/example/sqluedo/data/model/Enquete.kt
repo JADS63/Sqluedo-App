@@ -1,17 +1,21 @@
 package com.example.sqluedo.data.model
 
-import android.media.Image
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Enquete(
-    val id: String,
+    val id: Int,
+    val nomCreateur: String,
+    @SerialName("titre")
     val nom: String,
     val description: String,
+    @SerialName("difficulteIntermediaire")
     val difficulteIntermediare: Int,
+    @SerialName("difficulteDifficile")
     val difficulteDificile: Int,
-    //val mld: Image,
-    val solution:String,
-    val indice:String,
-    val nomDatabase:String,
+    val mld: String,
+    val solution: String,
+    val indice: String,
+    val nomDatabase: String
 )
