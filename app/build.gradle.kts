@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.sqluedo"
+    namespace = "com.sqluedo"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.sqluedo"
+        applicationId = "com.sqluedo"
         minSdk = 21
         targetSdk = 35
         versionCode = 1
