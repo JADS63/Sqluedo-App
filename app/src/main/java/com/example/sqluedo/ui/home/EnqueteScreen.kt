@@ -29,18 +29,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sqluedo.R
 import com.example.sqluedo.data.model.Enquete
+import com.example.sqluedo.data.model.Stub
 
 @Composable
 fun EnqueteScreen(
-    goHome:()-> Unit,
-    goJeu:()-> Unit,
-    goConnection:()-> Unit,
+    goHome: () -> Unit,
+    goJeu: () -> Unit,
+    goConnection: () -> Unit,
     enquete: Enquete
-){
+) {
     AffichageEnqueteClickee(
         enquete,
         goHome,
@@ -52,9 +54,9 @@ fun EnqueteScreen(
 @Composable
 fun AffichageEnqueteClickee(
     enquete: Enquete,
-    goHome:()-> Unit,
-    goJeu:()-> Unit,
-    goConnection:()-> Unit
+    goHome: () -> Unit,
+    goJeu: () -> Unit,
+    goConnection: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -74,7 +76,7 @@ fun AffichageEnqueteClickee(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.retour),
-                    contentDescription = stringResource(id = R.string.image),
+                    contentDescription = stringResource(id = R.string.btn_retour),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(48.dp)
@@ -83,7 +85,7 @@ fun AffichageEnqueteClickee(
             }
 
             IconButton(
-                onClick =goConnection,
+                onClick = goConnection,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Image(
@@ -95,9 +97,8 @@ fun AffichageEnqueteClickee(
                         .clip(RoundedCornerShape(16.dp))
                 )
             }
-
-
         }
+
         Spacer(modifier = Modifier.height(64.dp))
 
         Text(
@@ -106,10 +107,11 @@ fun AffichageEnqueteClickee(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 24.dp)
         )
+
         Spacer(modifier = Modifier.height(64.dp))
 
         Text(
-            text = "Description",
+            text = stringResource(id = R.string.titre_description),
             fontSize = 24.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier
@@ -130,6 +132,7 @@ fun AffichageEnqueteClickee(
                 .padding(bottom = 24.dp),
             textAlign = TextAlign.Start
         )
+
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedCard(
@@ -145,11 +148,12 @@ fun AffichageEnqueteClickee(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.mcd),
-                contentDescription = stringResource(id = R.string.image),
+                contentDescription = stringResource(id = R.string.mcd_description),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
         Spacer(modifier = Modifier.height(100.dp))
 
         Button(
@@ -157,7 +161,7 @@ fun AffichageEnqueteClickee(
             modifier = Modifier.padding(2.dp)
         ) {
             Text(
-                text = "Jouer",
+                text = stringResource(id = R.string.btn_jouer),
                 fontSize = 14.sp,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -165,3 +169,15 @@ fun AffichageEnqueteClickee(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun EnqueteScreenPreview() {
+    MaterialTheme {
+        EnqueteScreen(
+            goHome = {},
+            goJeu = {},
+            goConnection = {},
+            enquete = Stub.enquetes.first()
+        )
+    }
+}

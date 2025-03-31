@@ -1,40 +1,122 @@
 package com.example.sqluedo.data.service
+
 import com.example.sqluedo.data.model.Enquete
 import com.example.sqluedo.data.model.Group
+import com.example.sqluedo.data.model.Utilisateur
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Retrofit
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
-private const val CODEFIRST_API_BASE = "LienVersLApi"
+private const val CODEFIRST_API_BASE = "https://codefirst.iut.uca.fr/containers/sqluedo-webservices/api/v1/"
+
+@Serializable
+data class PaginatedResponse<T>(
+    val items: List<T>,
+    val totalCount: Int,
+    val index: Int,
+    val count: Int
+)
+
+@Serializable
+data class RegisterResponse(
+    val nomUtilisateur: String
+)
 
 interface CodeFirstService {
+    // Endpoint de connexion
+    @POST("Auth/login")
+    @Headers("Content-Type: application/json")
+    suspend fun login(@Body requestBody: RequestBody): ResponseBody
 
-    //Récupérer toutes les enquêtes
-    @GET("enquetes")
-    suspend fun listEnquetesSuspend(): List<Enquete>
+    // Vérifier si un utilisateur existe
+    @GET("Utilisateur/exist/{name}")
+    suspend fun checkUserExists(
+        @Path("name") name: String,
+        @Header("Authorization") token: String
+    ): Boolean
 
-    //Récupérer une enquête à partir de son nom
-    @GET("enquetes/{enquete}")
-    suspend fun enqueteParNomSuspend(@Path("enquete") enqueteName: String): Enquete
+    // Récupérer un utilisateur par son nom
+    @GET("Utilisateur/{nom}")
+    suspend fun getUserByName(
+        @Path("nom") nom: String,
+        @Header("Authorization") token: String
+    ): Utilisateur
 
-    @GET("groupes")
-    suspend fun listGroupesSuspend():List<Group>
+    // Inscrire un nouvel utilisateur
+    @POST("Utilisateur/insert")
+    suspend fun registerUser(
+        @Query("name") name: String,
+        @Query("mdp") mdp: String,
+        @Header("Authorization") token: String
+    ): RegisterResponse
+
+    // Récupérer la liste des enquêtes
+    @GET("Enquete")
+    suspend fun listEnquetesSuspend(
+        @Header("Authorization") token: String,
+        @Query("index") index: Int = 0,
+        @Query("count") count: Int = 10
+    ): PaginatedResponse<Enquete>
+
+    // Récupérer une enquête par son nom
+    @GET("Enquete/{enquete}")
+    suspend fun enqueteParNomSuspend(
+        @Path("enquete") enqueteName: String,
+        @Header("Authorization") token: String
+    ): Enquete
+
+    // Récupérer la liste des groupes
+    @GET("Groupe")
+    suspend fun listGroupesSuspend(
+        @Header("Authorization") token: String
+    ): List<Group>
 }
 
+fun createLoginRequestBody(email: String, password: String): RequestBody {
+    val jsonObject = JSONObject()
+    jsonObject.put("email", email)
+    jsonObject.put("password", password)
+    val jsonString = jsonObject.toString()
+    return jsonString.toRequestBody("application/json".toMediaType())
+}
 
-// Builder qui créera l'instance de Retrofit pour accéder au service
 fun createCodeFirstRetrofit(): Retrofit {
-    // Définition du type MIME pour JSON
     val contentType = "application/json".toMediaType()
 
-    // Configuration de kotlinx.serialization pour ignorer les clés inconnues
-    val json = Json { ignoreUnknownKeys = true }
+    val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
+
+    val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 
     return Retrofit.Builder()
-        .baseUrl(CODEFIRST_API_BASE) // La base URL doit se terminer par '/'
+        .baseUrl(CODEFIRST_API_BASE)
+        .client(client)
         .addConverterFactory(json.asConverterFactory(contentType))
         .build()
+}
+
+fun createCodeFirstService(): CodeFirstService {
+    val retrofit = createCodeFirstRetrofit()
+    return retrofit.create(CodeFirstService::class.java)
 }
