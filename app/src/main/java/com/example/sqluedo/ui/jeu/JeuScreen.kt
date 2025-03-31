@@ -1,8 +1,16 @@
 package com.example.sqluedo.ui.jeu
 
+import android.content.ClipData
+import android.content.ClipDescription
+import android.view.View
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,12 +19,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.DragAndDropTransferData
+import androidx.compose.ui.draganddrop.mimeTypes
+import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -107,7 +122,7 @@ fun TopBar(goHome: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
     requeteSQL: String,
@@ -117,6 +132,43 @@ fun MainContent(
     onReponseChanged: (String) -> Unit,
     onValiderReponse: () -> Unit
 ) {
+    var txt  by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = "",
+                selection = TextRange(0)
+            )
+        )
+    }
+    val txtVide  =
+        TextFieldValue(
+            text = "",
+            selection = TextRange(0)
+        )
+
+    val callback = remember {
+        object : DragAndDropTarget {
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+
+
+
+                val clipData = event.toAndroidDragEvent().clipData
+                val txtDrop  =
+                    TextFieldValue(
+                        text = txt.text+clipData.getItemAt(0).text.toString(),
+                        selection = TextRange(txt.text.length+clipData.getItemAt(0).text.toString().length)
+                    )
+
+                if (clipData.itemCount > 0) {
+                    txt = txtDrop;
+                    println("Données reçues : $txt")
+                }
+                return true
+            }
+
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -139,9 +191,18 @@ fun MainContent(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                OutlinedTextField(
-                    value = requeteSQL,
-                    onValueChange = onRequeteChanged,
+                Box(
+                    modifier = Modifier
+                        .dragAndDropTarget(
+                            shouldStartDragAndDrop = { event ->
+                                event
+                                    .mimeTypes()
+                                    .contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                            }, target = callback
+                        )
+                ){OutlinedTextField(
+                    value = txt,
+                    onValueChange = { txt = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 100.dp),
@@ -150,7 +211,8 @@ fun MainContent(
                         unfocusedBorderColor = Color.LightGray,
                         focusedBorderColor = MaterialTheme.colorScheme.primary
                     )
-                )
+                )}
+
 
                 Box(
                     modifier = Modifier
@@ -245,6 +307,7 @@ fun MainContent(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SqlHelpButtons() {
     // Liste des commandes SQL à afficher comme boutons d'aide
@@ -270,16 +333,27 @@ fun SqlHelpButtons() {
         ) {
             // Boutons des commandes SQL
             sqlCommands.forEach { command ->
-                OutlinedButton(
-                    onClick = { /* Insérer la commande dans le champ de requête */ },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    ),
-                    border = BorderStroke(1.dp, Color.LightGray)
-                ) {
-                    Text(command)
-                }
+                Box(modifier = Modifier
+                    .background(Color.LightGray)
+                    .dragAndDropSource {
+                        detectTapGestures(onPress = {
+                            startTransfer(
+                                DragAndDropTransferData(
+                                    ClipData.newPlainText(
+                                        command, command.uppercase()
+                                    ),
+                                    flags = View.DRAG_FLAG_GLOBAL
+                                )
+                            )
+                        })
+                    }
+                    .padding(5.dp)
+                    .fillMaxWidth()
+                    .border(BorderStroke(1.dp, Color.LightGray))
+                    .padding(10.dp)
+                ) { Text(command, color = Color.Black) }
+
+
             }
         }
     }
