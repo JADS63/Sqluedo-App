@@ -100,6 +100,13 @@ interface CodeFirstService {
         @Header("Authorization") token: String
     ): List<Group>
 
+    @POST("Enquete/query")
+    @Headers("Content-Type: application/json")
+    suspend fun executeQuery(
+        @Body requestBody: RequestBody,
+        @Header("Authorization") token: String
+    ): ResponseBody
+
 
 }
 

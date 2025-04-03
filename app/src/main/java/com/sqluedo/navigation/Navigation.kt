@@ -13,10 +13,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.sqluedo.ViewModel.ConnexionState
+import com.sqluedo.ViewModel.EnqueteResultViewModel
 import com.sqluedo.ViewModel.UserConnexionViewModel
 import com.sqluedo.ViewModel.UserInscriptionViewModel
 import com.sqluedo.data.model.Enquete
 import com.sqluedo.data.model.Stub
+import com.sqluedo.data.repository.EnqueteRepository
+import com.sqluedo.data.service.createCodeFirstService
 import com.sqluedo.ui.connexion.ConnectionScreen
 import com.sqluedo.ui.connexion.InscriptionScreen
 import com.sqluedo.ui.home.EnqueteScreen
@@ -85,6 +88,12 @@ fun SQLuedoNavigation() {
 
     // État pour stocker l'enquête sélectionnée
     val selectedEnquete = remember { mutableStateOf<Enquete?>(null) }
+
+    val attempts = remember { mutableStateOf(0) }
+    val elapsedTime = remember { mutableStateOf(0L) }
+
+    // Créer le repository une seule fois
+    val repository = remember { EnqueteRepository(createCodeFirstService()) }
 
     NavHost(
         modifier = Modifier.fillMaxSize(),
@@ -163,9 +172,24 @@ fun SQLuedoNavigation() {
         composable(Jeu) {
             val enquete = selectedEnquete.value ?: Stub.enquetes.first()
 
+            // Passer le repository au ViewModel
+            val resultViewModel = remember {
+                EnqueteResultViewModel(
+                    enquete,
+                    repository
+                )
+            }
+
             JeuScreen(
                 goHome = { navController.navigateTo(Home) },
-                goResultat = { navController.navigateTo(Resultat) },
+                goResultat = {
+                    // Stocker les statistiques dans des variables partagées
+                    attempts.value = resultViewModel.getAttemptCount()
+                    elapsedTime.value = resultViewModel.getElapsedTime()
+
+                    // Naviguer vers l'écran de résultat
+                    navController.navigateTo(Resultat)
+                },
                 enquete = enquete
             )
         }
@@ -175,7 +199,9 @@ fun SQLuedoNavigation() {
 
             ResultatScreen(
                 enquete = enquete,
-                goHome = { navController.navigateTo(Home) }
+                goHome = { navController.navigateTo(Home) },
+                attempts = attempts.value,
+                timeTaken = elapsedTime.value
             )
         }
     }

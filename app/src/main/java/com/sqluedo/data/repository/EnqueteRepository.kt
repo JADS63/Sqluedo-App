@@ -24,6 +24,15 @@ class EnqueteRepository(private val service: CodeFirstService) {
         }
     }
 
+    /**
+     * Récupère le token d'authentification actuel.
+     *
+     * @return Le token d'authentification ou null s'il n'y en a pas
+     */
+    fun getAuthToken(): String? {
+        return authToken
+    }
+
     fun getEnquetes(index: Int = 0, count: Int = 3): Flow<List<Enquete>> = flow {
         if (authToken == null) {
             val success = login("admin@sqluedo.com", "Admin123!")
