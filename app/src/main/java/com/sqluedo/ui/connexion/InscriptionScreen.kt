@@ -116,7 +116,6 @@ fun InscriptionScreen(
                 value = nom,
                 onValueChange = {
                     nom = it
-                    // Reset state on change
                     viewModel.resetState()
                 },
                 label = { Text(stringResource(id = R.string.nom)) },
@@ -129,7 +128,7 @@ fun InscriptionScreen(
                             viewModel.checkUserExists(nom)
                         }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.menu), // Remplacer par une icône de vérification
+                                painter = painterResource(id = R.drawable.menu),
                                 contentDescription = "Vérifier disponibilité"
                             )
                         }
@@ -151,7 +150,6 @@ fun InscriptionScreen(
                 singleLine = true
             )
 
-            // Utilisé pour suivre si les mots de passe correspondent
             val passwordsMatch = mdp == confirmMdp
             val showPasswordError = mdp.isNotEmpty() && confirmMdp.isNotEmpty() && !passwordsMatch
 
@@ -182,12 +180,10 @@ fun InscriptionScreen(
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        // Boutons d'action
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Observer si les champs sont remplis correctement
             val isFormValid = nom.isNotBlank() && mdp.isNotBlank() && confirmMdp.isNotBlank() && mdp == confirmMdp
             val isLoading = inscriptionState is InscriptionState.Loading
 

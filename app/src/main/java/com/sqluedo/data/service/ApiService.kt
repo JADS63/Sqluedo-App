@@ -80,11 +80,27 @@ interface CodeFirstService {
         @Header("Authorization") token: String
     ): Enquete
 
+    // Récupérer une solution par l'id de l'enquête
+    @GET("Enquete/{id}/solution")
+    suspend fun enqueteSolutionParIdSuspend(
+        @Path("id") enqueteId: Int,
+        @Header("Authorization") token: String
+    ): String
+
+    // Récupérer une database par l'id de l'enquête
+    @GET("Enquete/{id}/database")
+    suspend fun enqueteDatabaseParIdSuspend(
+        @Path("id") enqueteId: Int,
+        @Header("Authorization") token: String
+    ): String
+
     // Récupérer la liste des groupes
     @GET("Groupe")
     suspend fun listGroupesSuspend(
         @Header("Authorization") token: String
     ): List<Group>
+
+
 }
 
 fun createLoginRequestBody(email: String, password: String): RequestBody {

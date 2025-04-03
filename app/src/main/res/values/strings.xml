@@ -12,6 +12,8 @@
     <string name="SeConnecter">Se Connecter</string>
     <string name="CreerCompte">Créer Compte</string>
     <string name="titre_nouveau_compte">Nouveau Compte</string>
+    <string name="Chargement">Chargement en cours...</string>
+
 
     <!-- Navigation -->
     <string name="btn_retour">Retour</string>

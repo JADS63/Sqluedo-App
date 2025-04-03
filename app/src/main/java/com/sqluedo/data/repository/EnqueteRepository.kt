@@ -56,4 +56,33 @@ class EnqueteRepository(private val service: CodeFirstService) {
             20
         }
     }
+
+    suspend fun getSolutionEnquetes(id: Int) {
+        if (authToken == null) {
+            login("admin@sqluedo.com", "Admin123!")
+
+        }
+
+        try{
+            authToken?.let {
+                service.enqueteSolutionParIdSuspend(id,it)
+            }
+        } catch (e: Exception) {
+            println("Erreur lors de la récupération de la solution de l'enquête: ${e.message}")
+        }
+    }
+
+    suspend fun getDatabaseEnquetes(id: Int) {
+        if (authToken == null) {
+            login("admin@sqluedo.com", "Admin123!")
+        }
+
+        try{
+            authToken?.let {
+                service.enqueteDatabaseParIdSuspend(id,it)
+            }
+        } catch (e: Exception) {
+            println("Erreur lors de la récupération de la database de l'enquête: ${e.message}")
+        }
+    }
 }
