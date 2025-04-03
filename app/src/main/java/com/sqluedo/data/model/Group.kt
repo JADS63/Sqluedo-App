@@ -7,5 +7,5 @@ data class Group(
     val nom: String,
     val code: String,
     val nbUtilisateur: Int,
-    val nomCreator: Utilisateur,
+    val nomCreator: Utilisateur?,
 )

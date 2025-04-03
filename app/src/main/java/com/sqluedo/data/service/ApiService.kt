@@ -107,7 +107,29 @@ interface CodeFirstService {
         @Header("Authorization") token: String
     ): ResponseBody
 
+    // Créer un nouveau groupe
+    @POST("Groupe/creer")
+    @Headers("Content-Type: application/json")
+    suspend fun createGroupe(
+        @Body requestBody: RequestBody,
+        @Header("Authorization") token: String
+    ): String
 
+    // Rejoindre un groupe
+    @POST("Groupe/rejoindre")
+    suspend fun joinGroupe(
+        @Query("nomGroupe") nomGroupe: String,
+        @Query("nomUtilisateur") nomUtilisateur: String,
+        @Header("Authorization") token: String
+    ): ResponseBody
+
+    // Quitter un groupe
+    @POST("Groupe/quitter")
+    suspend fun leaveGroupe(
+        @Query("nomGroupe") nomGroupe: String,
+        @Query("nomUtilisateur") nomUtilisateur: String,
+        @Header("Authorization") token: String
+    ): ResponseBody
 }
 
 fun createLoginRequestBody(email: String, password: String): RequestBody {
