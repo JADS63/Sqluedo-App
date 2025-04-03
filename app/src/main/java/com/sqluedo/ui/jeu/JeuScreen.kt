@@ -12,6 +12,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -71,10 +73,14 @@ import com.sqluedo.data.service.createCodeFirstService
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
+// ---------------------------------------------------------
 // Data class pour représenter un bloc de la palette
+// ---------------------------------------------------------
 data class PuzzleData(val label: String, val color: Color)
 
+// ---------------------------------------------------------
 // Composant PuzzleBlock : bloc de puzzle avec forme personnalisée
+// ---------------------------------------------------------
 @Composable
 fun PuzzleBlock(
     text: String,
@@ -92,7 +98,9 @@ fun PuzzleBlock(
     }
 }
 
+// ---------------------------------------------------------
 // Forme personnalisée pour simuler une pièce de puzzle
+// ---------------------------------------------------------
 val PuzzlePieceShape: Shape = object : Shape {
     override fun createOutline(
         size: androidx.compose.ui.geometry.Size,
@@ -125,7 +133,9 @@ val PuzzlePieceShape: Shape = object : Shape {
     }
 }
 
+// ---------------------------------------------------------
 // Composant PuzzleDragDropEditor : éditeur drag & drop de blocs puzzle
+// ---------------------------------------------------------
 @Composable
 fun PuzzleDragDropEditor(
     blocsSQL: List<BlocSQL>,
@@ -245,7 +255,9 @@ fun PuzzleDragDropEditor(
     }
 }
 
+// ---------------------------------------------------------
 // Composant InfoJeu : affiche le nombre de tentatives et le temps écoulé
+// ---------------------------------------------------------
 @Composable
 fun InfoJeu(attempts: Int, elapsedSeconds: Long) {
     Row(
@@ -257,14 +269,15 @@ fun InfoJeu(attempts: Int, elapsedSeconds: Long) {
     }
 }
 
-// Adaptation de JeuScreen intégrant l'éditeur puzzle, le compteur et le timer
+// ---------------------------------------------------------
+// Adaptation de JeuScreen pour intégrer l'éditeur puzzle, le compteur, le timer et l'indice
+// ---------------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JeuScreen(
     goHome: () -> Unit,
     goResultat: (Int, Long) -> Unit,
     enquete: Enquete
-
 ) {
     // Création des ViewModels (supposés définis dans votre projet)
     val repository = EnqueteRepository(createCodeFirstService())
@@ -283,12 +296,14 @@ fun JeuScreen(
     val blocsSQL by blocViewModel.blocsSQL.collectAsState()
     val requeteSQL by blocViewModel.requeteSQL.collectAsState()
 
-    // Déclaration de la variable reponseText dans le scope de JeuScreen
+    // Variable pour le champ de réponse
     var reponseText by remember { mutableStateOf("") }
 
     // Nouveaux états pour le compteur de tentatives et le timer
     var attemptCount by remember { mutableStateOf(0) }
     var elapsedTime by remember { mutableStateOf(0L) }
+    // État pour afficher l'indice
+    var showHint by remember { mutableStateOf(false) }
 
     // Timer : incrémente le temps chaque seconde
     LaunchedEffect(Unit) {
@@ -336,25 +351,72 @@ fun JeuScreen(
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        // Bouton pour exécuter la requête et incrémenter le compteur de tentatives
-        Button(
-            onClick = {
-                attemptCount++
-                queryViewModel.executeQuery(blocViewModel.getRequeteSQL())
-            },
-            shape = RoundedCornerShape(4.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            enabled = !isLoadingQuery && requeteSQL.isNotBlank(),
-            modifier = Modifier.align(Alignment.End)
+        // Section de réponse utilisateur avec icône de loupe pour afficher l'indice
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (isLoadingQuery) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-            } else {
-                Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+            OutlinedTextField(
+                value = reponseText,
+                onValueChange = { reponseText = it },
+                modifier = Modifier.weight(1f),
+                label = { Text(stringResource(id = R.string.label_reponse)) },
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = when {
+                        verificationResult?.isCorrect == true -> Color.Green
+                        verificationResult?.isCorrect == false -> Color.Red
+                        else -> MaterialTheme.colorScheme.primary
+                    }
+                ),
+                isError = verificationResult?.isCorrect == false
+            )
+            IconButton(
+                onClick = {
+                    // Si le nombre de tentatives dépasse le seuil défini dans l'enquête, afficher l'indice
+                    if (attemptCount > enquete.difficulteDificile) {
+                        showHint = true
+                    }
+                }
+            ) {
+                Icon(imageVector = Icons.Default.Search, contentDescription = "Afficher indice")
             }
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(stringResource(id = R.string.btn_valider))
+            Button(
+                onClick = {
+                    attemptCount++
+                    queryViewModel.executeQuery(blocViewModel.getRequeteSQL())
+                },
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                enabled = !isLoadingQuery && requeteSQL.isNotBlank(),
+                modifier = Modifier.align(Alignment.CenterVertically)
+            ) {
+                if (isLoadingQuery) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                } else {
+                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(stringResource(id = R.string.btn_valider))
+            }
+        }
+        // Affichage de l'indice si demandé
+        if (showHint) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable { showHint = false },
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Indice : ${enquete.indice}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
         // Tableau de résultats
@@ -397,91 +459,7 @@ fun JeuScreen(
                 }
             }
         }
-        // Section de réponse utilisateur
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = reponseText,
-                onValueChange = { reponseText = it },
-                modifier = Modifier.weight(1f),
-                label = { Text(stringResource(id = R.string.label_reponse)) },
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = when {
-                        verificationResult?.isCorrect == true -> Color.Green
-                        verificationResult?.isCorrect == false -> Color.Red
-                        else -> MaterialTheme.colorScheme.primary
-                    }
-                ),
-                isError = verificationResult?.isCorrect == false
-            )
-            Button(
-                onClick = { resultViewModel.verifyAnswer(reponseText) },
-                shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = when {
-                        verificationResult?.isCorrect == true -> Color(0xFF4CAF50)
-                        isLoadingResult -> Color.Gray
-                        else -> Color.DarkGray
-                    }
-                ),
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .animateContentSize(
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                    ),
-                enabled = !isLoadingResult && reponseText.isNotBlank()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    if (isLoadingResult) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                    } else if (verificationResult?.isCorrect == true) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    Text(
-                        text = when {
-                            verificationResult?.isCorrect == true -> "Correct !"
-                            isLoadingResult -> "Vérification..."
-                            else -> stringResource(id = R.string.btn_valider)
-                        }
-                    )
-                }
-            }
-        }
-        verificationResult?.let {
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = if (it.isCorrect) Color(0xFFE0F7E6) else Color(0xFFFDE8E8)),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (it.isCorrect) Icons.Default.Check else Icons.Default.Warning,
-                        contentDescription = null,
-                        tint = if (it.isCorrect) Color.Green else Color.Red,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = it.message,
-                        color = if (it.isCorrect) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
+        // Section de réponse utilisateur (optionnelle, ici déjà incluse ci-dessus)
     }
 }
 
@@ -512,8 +490,11 @@ fun TopBar(goHome: () -> Unit) {
     }
 }
 
-// Fonctions complémentaires pour l'éditeur texte et l'affichage des résultats
+// ---------------------------------------------------------
+// Fonctions complémentaires pour éditeur texte et affichage des résultats
+// ---------------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun TextEditorUI(
     requeteSQL: String,
