@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel pour gérer la création des groupes.
  */
-class CreateGroupeViewModel(private val repository: GroupeRepository) : ViewModel() {
+class CreateGroupeViewModel(private val groupeRepository: GroupeRepository) : ViewModel() {
 
     private val _creationState = MutableStateFlow<GroupeCreationState>(GroupeCreationState.Initial)
     val creationState: StateFlow<GroupeCreationState> = _creationState
@@ -37,10 +37,35 @@ class CreateGroupeViewModel(private val repository: GroupeRepository) : ViewMode
 
         viewModelScope.launch {
             try {
-                val result = repository.createGroupe(nomGroupe, code, nomCreateur)
+                // Créer le groupe
+                val result = groupeRepository.createGroupe(nomGroupe, code, nomCreateur)
                 result.fold(
                     onSuccess = { message ->
-                        _creationState.value = GroupeCreationState.Success(message, nomGroupe)
+                        // Si le groupe est créé avec succès, faire rejoindre l'utilisateur
+                        try {
+                            val joinResult = groupeRepository.joinGroupe(nomGroupe, nomCreateur)
+                            joinResult.fold(
+                                onSuccess = { joinMessage ->
+                                    _creationState.value = GroupeCreationState.Success(
+                                        "Groupe créé avec succès et vous avez rejoint le groupe.",
+                                        nomGroupe
+                                    )
+                                },
+                                onFailure = { joinError ->
+                                    // Le groupe a été créé mais l'utilisateur n'a pas rejoint
+                                    _creationState.value = GroupeCreationState.Success(
+                                        "Groupe créé avec succès mais erreur lors de la tentative de rejoindre le groupe: ${joinError.message}",
+                                        nomGroupe
+                                    )
+                                }
+                            )
+                        } catch (e: Exception) {
+                            // Le groupe a été créé mais il y a eu une erreur pour rejoindre
+                            _creationState.value = GroupeCreationState.Success(
+                                "Groupe créé, mais erreur lors de la tentative de rejoindre: ${e.message}",
+                                nomGroupe
+                            )
+                        }
                     },
                     onFailure = { error ->
                         _creationState.value = GroupeCreationState.Error(

@@ -109,11 +109,10 @@ interface CodeFirstService {
 
     // Créer un nouveau groupe
     @POST("Groupe/creer")
-    @Headers("Content-Type: application/json")
     suspend fun createGroupe(
         @Body requestBody: RequestBody,
         @Header("Authorization") token: String
-    ): String
+    ): ResponseBody
 
     // Rejoindre un groupe
     @POST("Groupe/rejoindre")

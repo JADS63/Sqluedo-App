@@ -2,20 +2,15 @@ package com.sqluedo.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.sqluedo.ViewModel.ConnexionState
-import com.sqluedo.ViewModel.EnqueteResultViewModel
+import androidx.navigation.navArgument
 import com.sqluedo.ViewModel.UserConnexionViewModel
-import com.sqluedo.ViewModel.UserInscriptionViewModel
 import com.sqluedo.data.model.Enquete
 import com.sqluedo.data.model.Stub
 import com.sqluedo.data.repository.EnqueteRepository
@@ -27,51 +22,16 @@ import com.sqluedo.ui.home.HomeScreenWithViewModel
 import com.sqluedo.ui.informations.InformationsScreen
 import com.sqluedo.ui.jeu.JeuScreen
 import com.sqluedo.ui.jeu.ResultatScreen
-import kotlinx.serialization.Serializable
 
-@Serializable
-object Home
-
-@Serializable
-object Connexion
-
-@Serializable
-object Inscription
-
-@Serializable
-object Informations
-
-@Serializable
-object Jeu
-
-@Serializable
-object Resultat
-
-@Serializable
-object EnqueteDetail
-
-private fun getRoute(destination: Any): String {
-    return destination::class.java.simpleName
-}
-
-// Extensions pour simplifier l'utilisation de la navigation
-fun NavGraphBuilder.composable(
-    route: Any,
-    content: @Composable () -> Unit
-) {
-    composable(getRoute(route)) { content() }
-}
-
-fun NavHostController.navigateTo(destination: Any) {
-    val route = getRoute(destination)
-    this.navigate(route) {
-        popUpTo(this@navigateTo.graph.findStartDestination().id) {
-            saveState = true
-        }
-        launchSingleTop = true
-        restoreState = true
-    }
-}
+// Définition des routes de base sous forme de chaînes
+private const val HOME_ROUTE = "Home"
+private const val CONNEXION_ROUTE = "Connexion"
+private const val INSCRIPTION_ROUTE = "Inscription"
+private const val INFORMATIONS_ROUTE = "Informations"
+private const val ENQUETE_DETAIL_ROUTE = "EnqueteDetail"
+private const val JEU_ROUTE = "Jeu"
+// La route de résultat contient deux paramètres
+private const val RESULTAT_ROUTE = "Resultat/{attempts}/{timeTaken}"
 
 @Composable
 fun SQLuedoNavigation() {
@@ -80,17 +40,12 @@ fun SQLuedoNavigation() {
     val statistiques = Stub.statistiques
     val utilisateur = Stub.utilisateur1
 
-    // Création du ViewModel partagé avec état de connexion
+    // ViewModel de connexion partagé
     val connexionViewModel = remember { UserConnexionViewModel() }
 
-    // État de connexion pour suivre si l'utilisateur est connecté
+    // États de connexion et de l'enquête sélectionnée
     val isLoggedIn = remember { mutableStateOf(false) }
-
-    // État pour stocker l'enquête sélectionnée
     val selectedEnquete = remember { mutableStateOf<Enquete?>(null) }
-
-    val attempts = remember { mutableStateOf(0) }
-    val elapsedTime = remember { mutableStateOf(0L) }
 
     // Créer le repository une seule fois
     val repository = remember { EnqueteRepository(createCodeFirstService()) }
@@ -98,110 +53,95 @@ fun SQLuedoNavigation() {
     NavHost(
         modifier = Modifier.fillMaxSize(),
         navController = navController,
-        startDestination = getRoute(Home)
+        startDestination = HOME_ROUTE
     ) {
-        composable(Home) {
+        composable(HOME_ROUTE) {
             HomeScreenWithViewModel(
                 goConnexion = {
                     if (isLoggedIn.value) {
-                        navController.navigateTo(Informations)
+                        navController.navigate(INFORMATIONS_ROUTE)
                     } else {
-                        navController.navigateTo(Connexion)
+                        navController.navigate(CONNEXION_ROUTE)
                     }
                 },
                 goEnquete = { enquete ->
                     selectedEnquete.value = enquete
-                    navController.navigateTo(EnqueteDetail)
+                    navController.navigate(ENQUETE_DETAIL_ROUTE)
                 }
             )
         }
-
-        composable(Connexion) {
+        composable(CONNEXION_ROUTE) {
             ConnectionScreen(
-                goHome = { navController.navigateTo(Home) },
-                goInscription = { navController.navigateTo(Inscription) },
+                goHome = { navController.navigate(HOME_ROUTE) },
+                goInscription = { navController.navigate(INSCRIPTION_ROUTE) },
                 goInformations = {
                     isLoggedIn.value = true
-                    navController.navigateTo(Home)
+                    navController.navigate(HOME_ROUTE)
                 },
                 viewModel = connexionViewModel
             )
         }
-
-        composable(Inscription) {
-            val inscriptionViewModel = remember { UserInscriptionViewModel() }
+        composable(INSCRIPTION_ROUTE) {
+            val inscriptionViewModel = remember { com.sqluedo.ViewModel.UserInscriptionViewModel() }
             InscriptionScreen(
-                goConnection = { navController.navigateTo(Connexion) },
+                goConnection = { navController.navigate(CONNEXION_ROUTE) },
                 viewModel = inscriptionViewModel
             )
         }
-
-        composable(Informations) {
+        composable(INFORMATIONS_ROUTE) {
             val connectedUser = connexionViewModel.currentUser.value ?: utilisateur
             InformationsScreen(
                 user = connectedUser,
                 stat = statistiques,
-                goHome = { navController.navigateTo(Home) },
+                goHome = { navController.navigate(HOME_ROUTE) },
                 goLogout = {
-                    // Déconnecter l'utilisateur
                     connexionViewModel.logout()
                     isLoggedIn.value = false
-                    // Rediriger vers la page de connexion
-                    navController.navigateTo(Connexion)
+                    navController.navigate(CONNEXION_ROUTE)
                 }
             )
         }
-
-        composable(EnqueteDetail) {
+        composable(ENQUETE_DETAIL_ROUTE) {
             val enquete = selectedEnquete.value ?: Stub.enquetes.first()
-
             EnqueteScreen(
-                goHome = { navController.navigateTo(Home) },
-                goJeu = { navController.navigateTo(Jeu) },
+                goHome = { navController.navigate(HOME_ROUTE) },
+                goJeu = { navController.navigate(JEU_ROUTE) },
                 goConnection = {
                     if (isLoggedIn.value) {
-                        navController.navigateTo(Informations)
+                        navController.navigate(INFORMATIONS_ROUTE)
                     } else {
-                        navController.navigateTo(Connexion)
+                        navController.navigate(CONNEXION_ROUTE)
                     }
                 },
                 enquete = enquete
             )
         }
-
-        composable(Jeu) {
+        composable(JEU_ROUTE) {
             val enquete = selectedEnquete.value ?: Stub.enquetes.first()
-
-            // Passer le repository au ViewModel
-            val resultViewModel = remember {
-                EnqueteResultViewModel(
-                    enquete,
-                    repository
-                )
-            }
-
             JeuScreen(
-                goHome = { navController.navigateTo(Home) },
-                goResultat = {
-                    // Stocker les statistiques dans des variables partagées
-                    attempts.value = resultViewModel.getAttemptCount()
-                    elapsedTime.value = resultViewModel.getElapsedTime()
-
-                    // Naviguer vers l'écran de résultat
-                    navController.navigateTo(Resultat)
+                goHome = { navController.navigate(HOME_ROUTE) },
+                goResultat = { a, t ->
+                    // Transmettez les statistiques en naviguant vers la route avec paramètres
+                    navController.navigate("Resultat/${a}/${t}")
                 },
                 enquete = enquete
             )
         }
-
-        composable(Resultat) {
-            val enquete = selectedEnquete.value ?: Stub.enquetes.first()
-
+        // Définition de la route pour le résultat avec arguments
+        composable(
+            route = RESULTAT_ROUTE,
+            arguments = listOf(
+                navArgument("attempts") { type = NavType.IntType },
+                navArgument("timeTaken") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val attempts = backStackEntry.arguments?.getInt("attempts") ?: 1
+            val timeTaken = backStackEntry.arguments?.getLong("timeTaken") ?: 0L
             ResultatScreen(
-                enquete = enquete,
-                goHome = { navController.navigateTo(Home) },
-                attempts = attempts.value,
-                timeTaken = elapsedTime.value
+                enquete = selectedEnquete.value ?: Stub.enquetes.first(),
+                goHome = { navController.navigate(HOME_ROUTE) },
+                attempts = attempts,
+                timeTaken = timeTaken
             )
         }
     }

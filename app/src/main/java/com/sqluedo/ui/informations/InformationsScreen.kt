@@ -102,6 +102,17 @@ fun InformationsScreen(
         }
     }
 
+// Ajoutez la surveillance de l'état d'erreur du GroupeDetailViewModel
+    val errorState by groupeDetailViewModel.error.collectAsState()
+    LaunchedEffect(errorState) {
+        if (!errorState.isNullOrEmpty()) {
+            errorMessage.value = errorState ?: "Une erreur s'est produite"
+            showErrorMessage.value = true
+            // Réinitialiser l'erreur après l'avoir affichée
+            groupeDetailViewModel.resetError()
+        }
+    }
+
     LaunchedEffect(creationState) {
         when (creationState) {
             is GroupeCreationState.Success -> {
@@ -185,7 +196,7 @@ fun InformationsScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        StatistiquesSection(stat)
+        //StatistiquesSection(stat)
 
         Spacer(modifier = Modifier.height(64.dp))
 
@@ -320,71 +331,71 @@ fun InformationFields(user: Utilisateur) {
         )
     }
 }
-
-@Composable
-fun StatistiquesSection(stat: Statistiques) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF9F9F9)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(id = R.string.titre_statistiques),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-
-            Card(
-                modifier = Modifier
-                    .size(180.dp)
-                    .padding(8.dp),
-                border = BorderStroke(1.dp, Color.LightGray),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.connexion), // Remplacez par votre icône de médaille
-                        contentDescription = stringResource(id = R.string.badge_reussite),
-                        modifier = Modifier.size(64.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = stringResource(id = R.string.text_reussite),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Text(
-                        text = stringResource(id = R.string.pourcentage_reussite),
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
-        }
-    }
-}
+//
+//@Composable
+//fun StatistiquesSection(stat: Statistiques) {
+//    Card(
+//        modifier = Modifier.fillMaxWidth(),
+//        colors = CardDefaults.cardColors(
+//            containerColor = Color(0xFFF9F9F9)
+//        ),
+//        elevation = CardDefaults.cardElevation(
+//            defaultElevation = 0.dp
+//        )
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(20.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Text(
+//                text = stringResource(id = R.string.titre_statistiques),
+//                fontSize = 24.sp,
+//                fontWeight = FontWeight.Bold,
+//                modifier = Modifier.padding(bottom = 24.dp)
+//            )
+//
+//            Card(
+//                modifier = Modifier
+//                    .size(180.dp)
+//                    .padding(8.dp),
+//                border = BorderStroke(1.dp, Color.LightGray),
+//                colors = CardDefaults.cardColors(
+//                    containerColor = Color.White
+//                )
+//            ) {
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .padding(16.dp),
+//                    horizontalAlignment = Alignment.CenterHorizontally,
+//                    verticalArrangement = Arrangement.Center
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.connexion), // Remplacez par votre icône de médaille
+//                        contentDescription = stringResource(id = R.string.badge_reussite),
+//                        modifier = Modifier.size(64.dp)
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(16.dp))
+//
+//                    Text(
+//                        text = stringResource(id = R.string.text_reussite),
+//                        fontSize = 18.sp,
+//                        fontWeight = FontWeight.Bold
+//                    )
+//
+//                    Text(
+//                        text = stringResource(id = R.string.pourcentage_reussite),
+//                        fontSize = 16.sp,
+//                        color = Color.Gray
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun GroupButtons(

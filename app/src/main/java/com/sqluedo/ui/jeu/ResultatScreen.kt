@@ -36,7 +36,6 @@ import com.sqluedo.data.service.createCodeFirstService
 fun ResultatScreen(
     enquete: Enquete,
     goHome: () -> Unit,
-    // Vous pouvez passer les données de statistiques en paramètre si nécessaire
     attempts: Int = 1,
     timeTaken: Long = 0
 ) {

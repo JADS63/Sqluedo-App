@@ -97,6 +97,12 @@ class GroupeDetailViewModel(
             }
         }
     }
+    /**
+     * Réinitialise le message d'erreur
+     */
+    fun resetError() {
+        _error.value = null
+    }
 
     /**
      * Met à jour les informations de groupe pour l'utilisateur

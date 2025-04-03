@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.foundation:foundation:1.6.7")
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
