@@ -353,10 +353,13 @@ fun JeuScreen(
         Spacer(modifier = Modifier.height(8.dp))
         // Section de réponse utilisateur avec icône de loupe pour afficher l'indice
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Champ de réponse
             OutlinedTextField(
                 value = reponseText,
                 onValueChange = { reponseText = it },
@@ -372,16 +375,31 @@ fun JeuScreen(
                 ),
                 isError = verificationResult?.isCorrect == false
             )
+
+            // Icône loupe pour afficher l'indice (si attemptCount > enquete.difficulteDificile)
             IconButton(
                 onClick = {
-                    // Si le nombre de tentatives dépasse le seuil défini dans l'enquête, afficher l'indice
                     if (attemptCount > enquete.difficulteDificile) {
                         showHint = true
                     }
                 }
             ) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Afficher indice")
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Afficher indice"
+                )
             }
+        }
+
+// ---------------------------------------------------------
+// Boutons d'action : "Exécuter la requête" et "Valider l'enquête"
+// ---------------------------------------------------------
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Bouton pour exécuter la requête SQL
             Button(
                 onClick = {
                     attemptCount++
@@ -390,16 +408,53 @@ fun JeuScreen(
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                enabled = !isLoadingQuery && requeteSQL.isNotBlank(),
-                modifier = Modifier.align(Alignment.CenterVertically)
+                enabled = !isLoadingQuery && requeteSQL.isNotBlank()
             ) {
                 if (isLoadingQuery) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
                 } else {
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(id = R.string.btn_valider))
+                Text(text = "Exécuter la requête")
+            }
+
+            // Bouton pour valider l'enquête (vérifier la réponse)
+            Button(
+                onClick = {
+                    resultViewModel.verifyAnswer(reponseText)
+                },
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50)
+                ),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                enabled = !isLoadingResult && reponseText.isNotBlank()
+            ) {
+                if (isLoadingResult) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Valider l'enquête")
             }
         }
         // Affichage de l'indice si demandé
