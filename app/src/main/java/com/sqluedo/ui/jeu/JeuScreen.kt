@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
@@ -71,6 +73,9 @@ import com.sqluedo.data.model.getColorForType
 import com.sqluedo.data.repository.EnqueteRepository
 import com.sqluedo.data.service.createCodeFirstService
 import kotlinx.coroutines.delay
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import kotlin.math.roundToInt
 
 // ---------------------------------------------------------
@@ -279,7 +284,7 @@ fun JeuScreen(
     goResultat: (Int, Long) -> Unit,
     enquete: Enquete
 ) {
-    // Création des ViewModels (supposés définis dans votre projet)
+    // Repository et ViewModels
     val repository = EnqueteRepository(createCodeFirstService())
     val queryViewModel = remember { PlayQueryViewModel(enquete, repository) }
     val resultViewModel = remember { EnqueteResultViewModel(enquete, repository) }
@@ -322,7 +327,8 @@ fun JeuScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        TopBar(goHome)
+        // Passer l'enquête au TopBar pour accéder au MLD
+        TopBar(goHome, enquete)
         Spacer(modifier = Modifier.height(8.dp))
         // Affichage du compteur et du timer
         InfoJeu(attempts = attemptCount, elapsedSeconds = elapsedTime)
@@ -376,7 +382,7 @@ fun JeuScreen(
                 isError = verificationResult?.isCorrect == false
             )
 
-            // Icône loupe pour afficher l'indice (si attemptCount > enquete.difficulteDificile)
+            // Icône loupe pour afficher l'indice (si attemptCount > enquete.difficulteDifficile)
             IconButton(
                 onClick = {
                     if (attemptCount > enquete.difficulteDificile) {
@@ -391,9 +397,7 @@ fun JeuScreen(
             }
         }
 
-// ---------------------------------------------------------
-// Boutons d'action : "Exécuter la requête" et "Valider l'enquête"
-// ---------------------------------------------------------
+        // Boutons d'action : "Exécuter la requête" et "Valider l'enquête"
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -514,12 +518,13 @@ fun JeuScreen(
                 }
             }
         }
-        // Section de réponse utilisateur (optionnelle, ici déjà incluse ci-dessus)
     }
 }
 
 @Composable
-fun TopBar(goHome: () -> Unit) {
+fun TopBar(goHome: () -> Unit, enquete: Enquete) {
+    var showMLDDialog by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -535,13 +540,188 @@ fun TopBar(goHome: () -> Unit) {
         }
         Text(text = "SQLuedo - Mode Jeu", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Row {
-            IconButton(onClick = { /* Action base de données */ }) {
-                Icon(painter = painterResource(id = R.drawable.menu), contentDescription = "Base de données", modifier = Modifier.size(32.dp))
-            }
-            IconButton(onClick = { /* Action profil */ }) {
-                Icon(painter = painterResource(id = R.drawable.connexion), contentDescription = "Profil", modifier = Modifier.size(32.dp))
+
+            // Icône de base de données pour afficher le MLD
+            IconButton(onClick = { showMLDDialog = true }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.database),
+                    contentDescription = "Base de donnée",
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
+    }
+
+    // Afficher le dialog avec l'image MLD quand on clique sur l'icône
+    if (showMLDDialog) {
+        MLDDialog(
+            enquete = enquete,
+            onDismiss = { showMLDDialog = false }
+        )
+    }
+}
+@Composable
+fun MLDDialog(
+    enquete: Enquete,
+    onDismiss: () -> Unit
+) {
+    val repository = EnqueteRepository(createCodeFirstService())
+
+    // État pour stocker les tables de la base de données actuelle
+    var tables by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    // Charger les tables de la base de données au démarrage
+    LaunchedEffect(enquete.nomDatabase) {
+        isLoading = true
+        error = null
+
+        try {
+            // S'assurer que nous avons un token d'authentification
+            if (repository.getAuthToken() == null) {
+                repository.login("admin@sqluedo.com", "Admin123!")
+            }
+
+            // Exécuter la requête pour obtenir les tables
+            val service = createCodeFirstService()
+            val requestBody = JSONObject().apply {
+                put("databaseName", enquete.nomDatabase)
+                put("sqlQuery", "SELECT table_name FROM information_schema.tables WHERE table_schema = '${enquete.nomDatabase}';")
+            }.toString().toRequestBody("application/json".toMediaType())
+
+            val response = repository.getAuthToken()?.let { token ->
+                service.executeQuery(requestBody, token)
+            }
+
+            // Parser la réponse
+            if (response != null) {
+                val responseJson = JSONObject(response.string())
+                if (responseJson.getBoolean("success")) {
+                    val dataArray = responseJson.getJSONArray("data")
+                    val tableList = mutableListOf<String>()
+
+                    for (i in 0 until dataArray.length()) {
+                        val tableObj = dataArray.getJSONObject(i)
+                        tableList.add(tableObj.getString("table_name"))
+                    }
+
+                    tables = tableList
+                } else {
+                    error = "Impossible de récupérer la structure de la base de données"
+                }
+            }
+        } catch (e: Exception) {
+            error = "Erreur: ${e.message}"
+        } finally {
+            isLoading = false
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Modèle Logique de Données (MLD)") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = "Base de données: ${enquete.nomDatabase}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else if (error != null) {
+                    Text(
+                        text = "Erreur lors du chargement des tables: $error",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    // Liste simple des tables
+                    Text(
+                        text = "Tables disponibles:",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            tables.forEach { tableName ->
+                                Text(
+                                    text = "• $tableName",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Fermer")
+            }
+        }
+    )
+}
+
+@Composable
+fun TableCard(tableName: String, description: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                text = tableName.uppercase(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+// Fonction utilitaire pour vérifier si une chaîne est en format Base64
+private fun isBase64(input: String): Boolean {
+    return try {
+        android.util.Base64.decode(input, android.util.Base64.DEFAULT)
+        true
+    } catch (e: Exception) {
+        false
     }
 }
 
