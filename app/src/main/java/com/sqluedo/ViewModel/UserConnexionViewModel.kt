@@ -43,6 +43,8 @@ class UserConnexionViewModel : ViewModel() {
                 if (userAuthenticated) {
                     utilisateurRepository.getUserByName(username).collect { user ->
                         if (user != null) {
+                            // Définir l'utilisateur dans le repository et dans le ViewModel
+                            utilisateurRepository.setCurrentUser(user)
                             _currentUser.value = user
                             _connexionState.value = ConnexionState.Success(user)
                         } else {
@@ -97,6 +99,33 @@ class UserConnexionViewModel : ViewModel() {
         _currentUser.value = null
         utilisateurRepository.logout()
         _connexionState.value = ConnexionState.Initial
+    }
+
+    /**
+     * Obtient le nom d'utilisateur actuel
+     *
+     * @return Le nom d'utilisateur ou null
+     */
+    fun getCurrentUsername(): String? {
+        return utilisateurRepository.getCurrentUsername()
+    }
+
+    /**
+     * Obtient l'utilisateur actuel
+     *
+     * @return L'utilisateur actuel ou null
+     */
+    fun getCurrentUser(): Utilisateur? {
+        return utilisateurRepository.getCurrentUser()
+    }
+
+    /**
+     * Vérifie si un utilisateur est connecté
+     *
+     * @return true si un utilisateur est connecté, false sinon
+     */
+    fun isUserLoggedIn(): Boolean {
+        return utilisateurRepository.isUserLoggedIn()
     }
 }
 

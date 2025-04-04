@@ -9,6 +9,40 @@ import org.json.JSONObject
 
 class UtilisateurRepository(private val service: CodeFirstService) {
     private var authToken: String? = null
+    private var currentUsername: String? = null
+    private var currentUser: Utilisateur? = null
+    /**
+     * Définit le nom d'utilisateur actuel
+     *
+     * @param username Le nom d'utilisateur à définir
+     */
+    fun setCurrentUsername(username: String) {
+        currentUsername = username
+    }
+
+    /**
+     * Récupère le nom d'utilisateur actuel
+     *
+     * @return Le nom d'utilisateur actuel ou null
+     */
+    fun getCurrentUsername(): String? = currentUsername
+
+    /**
+     * Définit l'utilisateur actuel
+     *
+     * @param user L'utilisateur à définir
+     */
+    fun setCurrentUser(user: Utilisateur) {
+        currentUser = user
+        currentUsername = user.nomUtilisateur
+    }
+
+    /**
+     * Récupère l'utilisateur actuel
+     *
+     * @return L'utilisateur actuel ou null
+     */
+    fun getCurrentUser(): Utilisateur? = currentUser
 
     /**
      * Authentifie auprès de l'API pour obtenir un token
@@ -16,6 +50,25 @@ class UtilisateurRepository(private val service: CodeFirstService) {
      *
      * @return true si l'authentification a réussi, false sinon
      */
+
+    /**
+     * Récupère le nom d'utilisateur de l'utilisateur connecté
+     * Si aucun utilisateur n'est connecté, retourne un nom par défaut
+     *
+     * @return Le nom d'utilisateur ou un nom par défaut
+     */
+    fun getActiveUsername(): String {
+        return currentUsername ?: currentUser?.nomUtilisateur ?: "admin_prof"
+    }
+
+    /**
+     * Vérifie si un utilisateur est actuellement connecté
+     *
+     * @return true si un utilisateur est connecté, false sinon
+     */
+    fun isUserLoggedIn(): Boolean {
+        return currentUsername != null || currentUser != null
+    }
     suspend fun authenticateApi(): Boolean {
         return try {
             println("Tentative d'authentification API avec admin@sqluedo.com")

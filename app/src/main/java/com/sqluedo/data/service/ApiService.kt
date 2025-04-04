@@ -129,6 +129,16 @@ interface CodeFirstService {
         @Query("nomUtilisateur") nomUtilisateur: String,
         @Header("Authorization") token: String
     ): ResponseBody
+
+    @POST("Statistiques/update-best-stats")
+    suspend fun updateBestStats(
+        @Query("nomUtilisateur") nomUtilisateur: String,
+        @Query("idEnquete") idEnquete: Int,
+        @Query("nbTentatives") nbTentatives: Int,
+        @Query("tempsPasse") tempsPasse: Int,
+        @Query("reussi") reussi: Boolean,
+        @Header("Authorization") token: String
+    ): ResponseBody
 }
 
 fun createLoginRequestBody(email: String, password: String): RequestBody {

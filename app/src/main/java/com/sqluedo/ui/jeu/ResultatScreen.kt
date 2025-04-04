@@ -1,5 +1,3 @@
-// Modifications à apporter au ResultatScreen.kt
-
 package com.sqluedo.ui.jeu
 
 import androidx.compose.foundation.BorderStroke
@@ -18,18 +16,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqluedo.R
 import com.sqluedo.ViewModel.EnqueteResultViewModel
+import com.sqluedo.ViewModel.StatistiquesFinDePartieViewModel
 import com.sqluedo.data.model.Enquete
-import com.sqluedo.data.model.Stub
 import com.sqluedo.data.repository.EnqueteRepository
+import com.sqluedo.data.repository.StatistiquesRepository
+import com.sqluedo.data.repository.UtilisateurRepository
 import com.sqluedo.data.service.createCodeFirstService
 
 @Composable
@@ -42,15 +39,44 @@ fun ResultatScreen(
     var attemptCount by remember { mutableStateOf(attempts) }
     var elapsedTime by remember { mutableStateOf(timeTaken) }
 
+    // Dépendances du repository
+    val codeFirstService = createCodeFirstService()
+    val repository = EnqueteRepository(codeFirstService)
+    val utilisateurRepository = UtilisateurRepository(codeFirstService)
+    val statistiquesRepository = StatistiquesRepository(codeFirstService, utilisateurRepository)
+
+    // ViewModel pour gérer l'envoi des statistiques
+    val statsViewModel = remember {
+        StatistiquesFinDePartieViewModel(
+            enquete = enquete,
+            utilisateurRepository = utilisateurRepository,
+            statistiquesRepository = statistiquesRepository
+        )
+    }
+
     // On peut également récupérer les statistiques depuis le ViewModel si elles ont été sauvegardées
-    val repository = EnqueteRepository(createCodeFirstService())
     val viewModel = remember { EnqueteResultViewModel(enquete, repository) }
+
+    // Gérer les erreurs de mise à jour des statistiques
+    val statsError by statsViewModel.error.collectAsState()
 
     // Si aucune statistique n'a été passée, utiliser celles du ViewModel
     LaunchedEffect(key1 = Unit) {
         if (attempts == 1 && timeTaken == 0L) {
             attemptCount = viewModel.getAttemptCount()
             elapsedTime = viewModel.getElapsedTime()
+        }
+
+        // Collectez le résultat du Flow
+        statsViewModel.envoyerStatistiquesFinPartie(
+            nomUtilisateur = utilisateurRepository.getCurrentUsername() ?: "admin_prof",
+            nbTentatives = attemptCount,
+            tempsPasse = elapsedTime.toInt()
+        ).collect { response ->
+            if (!response.success) {
+                println("Échec de l'envoi des statistiques: ${response.message}")
+                // Gérer l'erreur
+            }
         }
     }
 
@@ -72,13 +98,22 @@ fun ResultatScreen(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.retour),
-                    contentDescription = stringResource(id = R.string.btn_retour),
+                    contentDescription = "Retour",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(16.dp))
                 )
             }
+        }
+
+        // Afficher l'erreur de statistiques s'il y en a une
+        statsError?.let { error ->
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -268,18 +303,5 @@ fun formatTime(seconds: Long): String {
         String.format("%02d:%02d:%02d", hours, minutes, secs)
     } else {
         String.format("%02d:%02d", minutes, secs)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ResultatScreenPreview() {
-    MaterialTheme {
-        ResultatScreen(
-            enquete = Stub.enquetes.first(),
-            goHome = {},
-            attempts = 3,
-            timeTaken = 145
-        )
     }
 }
