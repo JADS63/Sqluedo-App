@@ -15,19 +15,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqluedo.R
 import com.sqluedo.ViewModel.EnqueteResultViewModel
+import com.sqluedo.ViewModel.JeuPersistenceViewModel
 import com.sqluedo.ViewModel.StatistiquesFinDePartieViewModel
+import com.sqluedo.data.local.SQLuedoDatabase
 import com.sqluedo.data.model.Enquete
 import com.sqluedo.data.repository.EnqueteRepository
+import com.sqluedo.data.repository.JeuProgressionRepository
 import com.sqluedo.data.repository.StatistiquesRepository
 import com.sqluedo.data.repository.UtilisateurRepository
 import com.sqluedo.data.service.createCodeFirstService
+import kotlinx.coroutines.launch
 
 @Composable
 fun ResultatScreen(
@@ -39,13 +46,15 @@ fun ResultatScreen(
     var attemptCount by remember { mutableStateOf(attempts) }
     var elapsedTime by remember { mutableStateOf(timeTaken) }
 
-    // Dépendances du repository
+    val context = LocalContext.current
     val codeFirstService = createCodeFirstService()
     val repository = EnqueteRepository(codeFirstService)
     val utilisateurRepository = UtilisateurRepository(codeFirstService)
     val statistiquesRepository = StatistiquesRepository(codeFirstService, utilisateurRepository)
 
-    // ViewModel pour gérer l'envoi des statistiques
+    val database = SQLuedoDatabase.getDatabase(context)
+    val jeuProgressionRepository = JeuProgressionRepository(database.jeuProgressionDao())
+
     val statsViewModel = remember {
         StatistiquesFinDePartieViewModel(
             enquete = enquete,
@@ -53,29 +62,39 @@ fun ResultatScreen(
             statistiquesRepository = statistiquesRepository
         )
     }
+    val persistenceViewModel: JeuPersistenceViewModel = viewModel(
+        factory = JeuPersistenceViewModel.Factory(jeuProgressionRepository, utilisateurRepository)
+    )
 
-    // On peut également récupérer les statistiques depuis le ViewModel si elles ont été sauvegardées
     val viewModel = remember { EnqueteResultViewModel(enquete, repository) }
 
-    // Gérer les erreurs de mise à jour des statistiques
     val statsError by statsViewModel.error.collectAsState()
+    val persistenceError by persistenceViewModel.error.collectAsState()
+    val totalAttempts by persistenceViewModel.nbTentatives.collectAsState()
+    val tempsTotalUser by persistenceViewModel.tempsTotal.collectAsState()
+    val enquetesReussies by persistenceViewModel.enquetesReussies.collectAsState()
 
-    // Si aucune statistique n'a été passée, utiliser celles du ViewModel
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(key1 = Unit) {
+        persistenceViewModel.initEnquete(enquete)
+
         if (attempts == 1 && timeTaken == 0L) {
             attemptCount = viewModel.getAttemptCount()
             elapsedTime = viewModel.getElapsedTime()
         }
 
-        // Collectez le résultat du Flow
-        statsViewModel.envoyerStatistiquesFinPartie(
-            nomUtilisateur = utilisateurRepository.getCurrentUsername() ?: "admin_prof",
-            nbTentatives = attemptCount,
-            tempsPasse = elapsedTime.toInt()
-        ).collect { response ->
-            if (!response.success) {
-                println("Échec de l'envoi des statistiques: ${response.message}")
-                // Gérer l'erreur
+        persistenceViewModel.recordSuccess()
+
+        scope.launch {
+            statsViewModel.envoyerStatistiquesFinPartie(
+                nomUtilisateur = utilisateurRepository.getCurrentUsername() ?: "admin_prof",
+                nbTentatives = attemptCount,
+                tempsPasse = elapsedTime.toInt()
+            ).collect { response ->
+                if (!response.success) {
+                    println("Échec de l'envoi des statistiques: ${response.message}")
+                }
             }
         }
     }
@@ -86,7 +105,6 @@ fun ResultatScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // En-tête avec bouton de retour
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -98,7 +116,7 @@ fun ResultatScreen(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.retour),
-                    contentDescription = "Retour",
+                    contentDescription = stringResource(id = R.string.btn_retour),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(48.dp)
@@ -107,7 +125,14 @@ fun ResultatScreen(
             }
         }
 
-        // Afficher l'erreur de statistiques s'il y en a une
+        persistenceError?.let { error ->
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+
         statsError?.let { error ->
             Text(
                 text = error,
@@ -118,7 +143,6 @@ fun ResultatScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Badge de réussite
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xFFE8F5E9)
@@ -146,7 +170,7 @@ fun ResultatScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "RÉUSSI !",
+                    text = stringResource(id = R.string.success_label),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2E7D32)
@@ -156,7 +180,6 @@ fun ResultatScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Titre de l'enquête
         Text(
             text = enquete.nom,
             fontSize = 28.sp,
@@ -165,7 +188,6 @@ fun ResultatScreen(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        // Statistiques
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
@@ -182,7 +204,7 @@ fun ResultatScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Statistiques",
+                    text = stringResource(id = R.string.statistics_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -192,24 +214,62 @@ fun ResultatScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Tentatives
                     StatItem(
                         icon = Icons.Default.ThumbUp,
                         value = attemptCount.toString(),
-                        label = "Tentatives"
+                        label = stringResource(id = R.string.attempts_label)
                     )
 
-                    // Temps passé
                     StatItem(
                         icon = Icons.Default.Check,
                         value = formatTime(elapsedTime),
-                        label = "Temps"
+                        label = stringResource(id = R.string.time_label)
                     )
                 }
             }
         }
 
-        // Résultat
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Vos statistiques globales",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    StatItem(
+                        icon = Icons.Default.CheckCircle,
+                        value = enquetesReussies.toString(),
+                        label = "Enquêtes réussies"
+                    )
+
+                    StatItem(
+                        icon = Icons.Default.Check,
+                        value = formatTime(tempsTotalUser),
+                        label = "Temps total"
+                    )
+                }
+            }
+        }
+
         OutlinedCard(
             colors = CardDefaults.outlinedCardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -227,7 +287,7 @@ fun ResultatScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Solution de l'enquête",
+                    text = stringResource(id = R.string.investigation_solution),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -245,7 +305,6 @@ fun ResultatScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Bouton retour à l'accueil
         Button(
             onClick = goHome,
             modifier = Modifier
@@ -256,7 +315,7 @@ fun ResultatScreen(
             )
         ) {
             Text(
-                text = "Retour à l'accueil",
+                text = stringResource(id = R.string.return_to_home),
                 fontSize = 16.sp,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -293,7 +352,6 @@ fun StatItem(
     }
 }
 
-// Fonction pour formater le temps en heures:minutes:secondes
 fun formatTime(seconds: Long): String {
     val hours = seconds / 3600
     val minutes = (seconds % 3600) / 60

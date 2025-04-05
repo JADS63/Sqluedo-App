@@ -37,11 +37,9 @@ class CreateGroupeViewModel(private val groupeRepository: GroupeRepository) : Vi
 
         viewModelScope.launch {
             try {
-                // Créer le groupe
                 val result = groupeRepository.createGroupe(nomGroupe, code, nomCreateur)
                 result.fold(
                     onSuccess = { message ->
-                        // Si le groupe est créé avec succès, faire rejoindre l'utilisateur
                         try {
                             val joinResult = groupeRepository.joinGroupe(nomGroupe, nomCreateur)
                             joinResult.fold(
@@ -52,7 +50,6 @@ class CreateGroupeViewModel(private val groupeRepository: GroupeRepository) : Vi
                                     )
                                 },
                                 onFailure = { joinError ->
-                                    // Le groupe a été créé mais l'utilisateur n'a pas rejoint
                                     _creationState.value = GroupeCreationState.Success(
                                         "Groupe créé avec succès mais erreur lors de la tentative de rejoindre le groupe: ${joinError.message}",
                                         nomGroupe
@@ -60,7 +57,6 @@ class CreateGroupeViewModel(private val groupeRepository: GroupeRepository) : Vi
                                 }
                             )
                         } catch (e: Exception) {
-                            // Le groupe a été créé mais il y a eu une erreur pour rejoindre
                             _creationState.value = GroupeCreationState.Success(
                                 "Groupe créé, mais erreur lors de la tentative de rejoindre: ${e.message}",
                                 nomGroupe

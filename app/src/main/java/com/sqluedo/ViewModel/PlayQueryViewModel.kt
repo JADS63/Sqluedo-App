@@ -4,13 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sqluedo.data.model.Enquete
 import com.sqluedo.data.repository.EnqueteRepository
-import com.sqluedo.data.service.CodeFirstService
 import com.sqluedo.data.service.createCodeFirstService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import kotlin.collections.HashMap
@@ -40,7 +38,6 @@ class PlayQueryViewModel(
     val errorMessage: StateFlow<String?> = _errorMessage
 
     init {
-        // Authentification au démarrage
         authenticate()
     }
 
@@ -71,17 +68,14 @@ class PlayQueryViewModel(
 
                 val service = createCodeFirstService()
 
-                // Création du corps de la requête
                 val jsonObject = JSONObject()
                 jsonObject.put("databaseName", enquete.nomDatabase)
                 jsonObject.put("sqlQuery", sqlQuery)
                 val jsonString = jsonObject.toString()
                 val requestBody = jsonString.toRequestBody("application/json".toMediaType())
 
-                // Exécution de la requête
                 val response = service.executeQuery(requestBody, authToken)
 
-                // Parsing du résultat
                 val responseJson = JSONObject(response.string())
                 val success = responseJson.getBoolean("success")
 
@@ -89,13 +83,10 @@ class PlayQueryViewModel(
                     val dataArray = responseJson.getJSONArray("data")
                     val rowCount = responseJson.getInt("rowCount")
 
-                    // Extraction des colonnes et des données
                     val rows = mutableListOf<Map<String, Any>>()
                     val columnsSet = mutableSetOf<String>()
 
-                    // Si des données ont été retournées
                     if (dataArray.length() > 0) {
-                        // Extraire les noms des colonnes du premier objet
                         val firstRow = dataArray.getJSONObject(0)
                         val keys = firstRow.keys()
                         while (keys.hasNext()) {
@@ -103,14 +94,12 @@ class PlayQueryViewModel(
                             columnsSet.add(key)
                         }
 
-                        // Extraire les données de chaque ligne
                         for (i in 0 until dataArray.length()) {
                             val rowObj = dataArray.getJSONObject(i)
                             val rowMap = HashMap<String, Any>()
 
                             columnsSet.forEach { colName ->
                                 if (rowObj.has(colName)) {
-                                    // Convertir la valeur en type approprié
                                     val value = when {
                                         rowObj.isNull(colName) -> "NULL"
                                         else -> rowObj.get(colName)
@@ -125,7 +114,6 @@ class PlayQueryViewModel(
                         }
                     }
 
-                    // Création du résultat final
                     val columns = columnsSet.map { QueryResultColumn(it) }
                     _queryResult.value = QueryResult(
                         columns = columns,

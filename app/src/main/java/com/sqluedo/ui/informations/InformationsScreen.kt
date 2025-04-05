@@ -1,6 +1,5 @@
 package com.sqluedo.ui.informations
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,7 +40,6 @@ fun InformationsScreen(
     goHome: () -> Unit,
     goLogout: () -> Unit
 ) {
-    // Création des repositories et ViewModels
     val service = createCodeFirstService()
     val groupeRepository = remember { GroupeRepository(service) }
     val utilisateurRepository = remember { UtilisateurRepository(service) }
@@ -51,15 +49,12 @@ fun InformationsScreen(
         GroupeDetailViewModel(groupeRepository, utilisateurRepository)
     }
 
-    // État local pour stocker les informations de l'utilisateur
     var utilisateur by remember { mutableStateOf(user) }
     val coroutineScope = rememberCoroutineScope()
 
-    // Fonction pour rafraîchir les informations de l'utilisateur
     val refreshUserInfo = {
         coroutineScope.launch {
             try {
-                // Attendre un peu pour laisser le temps au serveur de mettre à jour les infos
                 delay(500)
                 utilisateurRepository.getUserByName(user.nomUtilisateur).collect { updatedUser ->
                     if (updatedUser != null) {
@@ -72,7 +67,6 @@ fun InformationsScreen(
         }
     }
 
-    // États pour les dialogues
     val showJoinDialog = remember { mutableStateOf(false) }
     val showCreateDialog = remember { mutableStateOf(false) }
     val groupeToJoin = remember { mutableStateOf("") }
@@ -81,11 +75,9 @@ fun InformationsScreen(
     val showErrorMessage = remember { mutableStateOf(false) }
     val errorMessage = remember { mutableStateOf("") }
 
-    // Observer les états
     val membershipState by groupeDetailViewModel.membershipState.collectAsState()
     val creationState by createGroupeViewModel.creationState.collectAsState()
 
-    // Effets pour traiter les réponses
     LaunchedEffect(membershipState) {
         when (membershipState) {
             is MembershipState.Member -> {
@@ -102,13 +94,11 @@ fun InformationsScreen(
         }
     }
 
-// Ajoutez la surveillance de l'état d'erreur du GroupeDetailViewModel
     val errorState by groupeDetailViewModel.error.collectAsState()
     LaunchedEffect(errorState) {
         if (!errorState.isNullOrEmpty()) {
             errorMessage.value = errorState ?: "Une erreur s'est produite"
             showErrorMessage.value = true
-            // Réinitialiser l'erreur après l'avoir affichée
             groupeDetailViewModel.resetError()
         }
     }
@@ -130,14 +120,12 @@ fun InformationsScreen(
         }
     }
 
-    // UI principal
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // En-tête avec bouton de retour et déconnexion
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -157,19 +145,17 @@ fun InformationsScreen(
                 )
             }
 
-            // Bouton de déconnexion
             TextButton(
                 onClick = goLogout,
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Text(
-                    text = "Déconnexion",
+                    text = stringResource(id = R.string.deco),
                     color = MaterialTheme.colorScheme.error
                 )
             }
         }
 
-        // Message de succès
         if (showSuccessMessage.value) {
             AlertCard(
                 message = successMessage.value,
@@ -179,7 +165,6 @@ fun InformationsScreen(
             )
         }
 
-        // Message d'erreur
         if (showErrorMessage.value) {
             AlertCard(
                 message = errorMessage.value,
@@ -191,23 +176,20 @@ fun InformationsScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Utiliser l'utilisateur mis à jour pour afficher les informations
         InformationFields(utilisateur)
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        //StatistiquesSection(stat)
 
         Spacer(modifier = Modifier.height(64.dp))
 
-        // Bouton pour rafraîchir manuellement les informations de l'utilisateur
         Button(
             onClick = { refreshUserInfo() },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text("Rafraîchir mes informations")
+            Text(stringResource(id = R.string.refresh))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -224,7 +206,6 @@ fun InformationsScreen(
         )
     }
 
-    // Dialogue pour rejoindre un groupe
     if (showJoinDialog.value) {
         JoinGroupDialog(
             onDismiss = { showJoinDialog.value = false },
@@ -235,7 +216,6 @@ fun InformationsScreen(
         )
     }
 
-    // Dialogue pour créer un groupe
     if (showCreateDialog.value) {
         CreateGroupDialog(
             onDismiss = { showCreateDialog.value = false },
@@ -277,7 +257,6 @@ fun AlertCard(
             )
 
             IconButton(onClick = onDismiss) {
-                // Ideally replace with a proper close icon
                 Text(
                     text = "×",
                     fontSize = 24.sp,
@@ -294,7 +273,6 @@ fun InformationFields(user: Utilisateur) {
     var nom by remember { mutableStateOf(user.nomUtilisateur) }
     var groupe by remember { mutableStateOf(user.nomGroupe?.nom ?: "") }
 
-    // Mettre à jour les champs quand l'utilisateur change
     LaunchedEffect(user) {
         nom = user.nomUtilisateur
         groupe = user.nomGroupe?.nom ?: ""
@@ -331,72 +309,6 @@ fun InformationFields(user: Utilisateur) {
         )
     }
 }
-//
-//@Composable
-//fun StatistiquesSection(stat: Statistiques) {
-//    Card(
-//        modifier = Modifier.fillMaxWidth(),
-//        colors = CardDefaults.cardColors(
-//            containerColor = Color(0xFFF9F9F9)
-//        ),
-//        elevation = CardDefaults.cardElevation(
-//            defaultElevation = 0.dp
-//        )
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(20.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Text(
-//                text = stringResource(id = R.string.titre_statistiques),
-//                fontSize = 24.sp,
-//                fontWeight = FontWeight.Bold,
-//                modifier = Modifier.padding(bottom = 24.dp)
-//            )
-//
-//            Card(
-//                modifier = Modifier
-//                    .size(180.dp)
-//                    .padding(8.dp),
-//                border = BorderStroke(1.dp, Color.LightGray),
-//                colors = CardDefaults.cardColors(
-//                    containerColor = Color.White
-//                )
-//            ) {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(16.dp),
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                    verticalArrangement = Arrangement.Center
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.connexion), // Remplacez par votre icône de médaille
-//                        contentDescription = stringResource(id = R.string.badge_reussite),
-//                        modifier = Modifier.size(64.dp)
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(16.dp))
-//
-//                    Text(
-//                        text = stringResource(id = R.string.text_reussite),
-//                        fontSize = 18.sp,
-//                        fontWeight = FontWeight.Bold
-//                    )
-//
-//                    Text(
-//                        text = stringResource(id = R.string.pourcentage_reussite),
-//                        fontSize = 16.sp,
-//                        color = Color.Gray
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
-
 @Composable
 fun GroupButtons(
     hasGroup: Boolean,
@@ -464,7 +376,6 @@ fun GroupButtons(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JoinGroupDialog(
     onDismiss: () -> Unit,
@@ -485,7 +396,7 @@ fun JoinGroupDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Rejoindre un groupe",
+                    text = stringResource(id = R.string.btn_rejoindre_groupe),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -497,7 +408,7 @@ fun JoinGroupDialog(
                 OutlinedTextField(
                     value = nomGroupe,
                     onValueChange = { nomGroupe = it },
-                    label = { Text("Nom du groupe") },
+                    label = { Text(stringResource(id = R.string.nomgroupe)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -511,7 +422,7 @@ fun JoinGroupDialog(
                     TextButton(
                         onClick = onDismiss
                     ) {
-                        Text("Annuler")
+                        Text(stringResource(id = R.string.annuler))
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -520,7 +431,7 @@ fun JoinGroupDialog(
                         onClick = { onJoin(nomGroupe) },
                         enabled = nomGroupe.isNotBlank()
                     ) {
-                        Text("Rejoindre")
+                        Text(stringResource(id = R.string.btn_rejoindre_groupe))
                     }
                 }
             }
@@ -528,7 +439,6 @@ fun JoinGroupDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateGroupDialog(
     onDismiss: () -> Unit,
@@ -551,7 +461,7 @@ fun CreateGroupDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Créer un groupe",
+                    text = stringResource(id = R.string.btn_creer_groupe),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -563,7 +473,7 @@ fun CreateGroupDialog(
                 OutlinedTextField(
                     value = nomGroupe,
                     onValueChange = { nomGroupe = it },
-                    label = { Text("Nom du groupe") },
+                    label = { Text(stringResource(id = R.string.nomgroupe)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = !isLoading
@@ -574,7 +484,7 @@ fun CreateGroupDialog(
                 OutlinedTextField(
                     value = codeGroupe,
                     onValueChange = { codeGroupe = it },
-                    label = { Text("Code d'accès") },
+                    label = { Text(stringResource(id = R.string.code)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = !isLoading
@@ -598,7 +508,7 @@ fun CreateGroupDialog(
                         onClick = onDismiss,
                         enabled = !isLoading
                     ) {
-                        Text("Annuler")
+                        Text(stringResource(id = R.string.refresh))
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -607,7 +517,7 @@ fun CreateGroupDialog(
                         onClick = { onCreate(nomGroupe, codeGroupe) },
                         enabled = nomGroupe.isNotBlank() && codeGroupe.isNotBlank() && !isLoading
                     ) {
-                        Text("Créer")
+                        Text(stringResource(id = R.string.CreerCompte))
                     }
                 }
             }

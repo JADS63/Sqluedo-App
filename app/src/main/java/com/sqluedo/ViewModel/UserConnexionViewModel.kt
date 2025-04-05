@@ -43,7 +43,6 @@ class UserConnexionViewModel : ViewModel() {
                 if (userAuthenticated) {
                     utilisateurRepository.getUserByName(username).collect { user ->
                         if (user != null) {
-                            // Définir l'utilisateur dans le repository et dans le ViewModel
                             utilisateurRepository.setCurrentUser(user)
                             _currentUser.value = user
                             _connexionState.value = ConnexionState.Success(user)

@@ -23,14 +23,12 @@ import com.sqluedo.ui.informations.InformationsScreen
 import com.sqluedo.ui.jeu.JeuScreen
 import com.sqluedo.ui.jeu.ResultatScreen
 
-// Définition des routes de base sous forme de chaînes
 private const val HOME_ROUTE = "Home"
 private const val CONNEXION_ROUTE = "Connexion"
 private const val INSCRIPTION_ROUTE = "Inscription"
 private const val INFORMATIONS_ROUTE = "Informations"
 private const val ENQUETE_DETAIL_ROUTE = "EnqueteDetail"
 private const val JEU_ROUTE = "Jeu"
-// La route de résultat contient deux paramètres
 private const val RESULTAT_ROUTE = "Resultat/{attempts}/{timeTaken}"
 
 @Composable
@@ -40,14 +38,11 @@ fun SQLuedoNavigation() {
     val statistiques = Stub.statistiques
     val utilisateur = Stub.utilisateur1
 
-    // ViewModel de connexion partagé
     val connexionViewModel = remember { UserConnexionViewModel() }
 
-    // États de connexion et de l'enquête sélectionnée
     val isLoggedIn = remember { mutableStateOf(false) }
     val selectedEnquete = remember { mutableStateOf<Enquete?>(null) }
 
-    // Créer le repository une seule fois
     val repository = remember { EnqueteRepository(createCodeFirstService()) }
 
     NavHost(
@@ -121,13 +116,11 @@ fun SQLuedoNavigation() {
             JeuScreen(
                 goHome = { navController.navigate(HOME_ROUTE) },
                 goResultat = { a, t ->
-                    // Transmettez les statistiques en naviguant vers la route avec paramètres
                     navController.navigate("Resultat/${a}/${t}")
                 },
                 enquete = enquete
             )
         }
-        // Définition de la route pour le résultat avec arguments
         composable(
             route = RESULTAT_ROUTE,
             arguments = listOf(

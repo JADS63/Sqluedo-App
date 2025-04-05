@@ -30,19 +30,16 @@ fun InscriptionScreen(
 ) {
     val inscriptionState by viewModel.inscriptionState.collectAsState()
 
-    // Variables d'état pour les champs du formulaire (déclarées au niveau supérieur)
     var nom by remember { mutableStateOf("") }
     var mdp by remember { mutableStateOf("") }
     var confirmMdp by remember { mutableStateOf("") }
 
-    // Effet pour naviguer vers la connexion après une inscription réussie
     LaunchedEffect(inscriptionState) {
         if (inscriptionState is InscriptionState.Success) {
             goConnection()
         }
     }
 
-    // Débogage - afficher l'état dans la console pour comprendre ce qui se passe
     LaunchedEffect(inscriptionState) {
         println("État actuel de l'inscription: $inscriptionState")
     }
@@ -65,7 +62,6 @@ fun InscriptionScreen(
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        // Afficher un message d'état
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -95,19 +91,17 @@ fun InscriptionScreen(
                 }
                 is InscriptionState.Loading -> {
                     Text(
-                        text = "Chargement en cours...",
+                        text = stringResource(id = R.string.Chargement),
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 else -> {
-                    // Espace réservé pour les messages
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
         }
 
-        // Champs du formulaire
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -129,7 +123,7 @@ fun InscriptionScreen(
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.menu),
-                                contentDescription = "Vérifier disponibilité"
+                                contentDescription = stringResource(id = R.string.mdp)
                             )
                         }
                     }
@@ -159,7 +153,7 @@ fun InscriptionScreen(
                     confirmMdp = it
                     viewModel.resetState()
                 },
-                label = { Text("Confirmer le mot de passe") },
+                label = { Text(stringResource(id = R.string.connfirmermdp)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -170,7 +164,7 @@ fun InscriptionScreen(
 
             if (showPasswordError) {
                 Text(
-                    text = "Les mots de passe ne correspondent pas",
+                    text = stringResource(id = R.string.mdppasegaux),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(start = 16.dp)
@@ -210,7 +204,7 @@ fun InscriptionScreen(
                 onClick = goConnection,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text(text = "Déjà un compte ? Se connecter")
+                Text(text = stringResource(id = R.string.compteexistant))
             }
         }
     }

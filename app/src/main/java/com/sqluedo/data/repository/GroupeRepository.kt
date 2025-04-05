@@ -84,9 +84,8 @@ class GroupeRepository(private val service: CodeFirstService) {
             val body = requestBody.toString().toRequestBody("application/json".toMediaType())
 
             try {
-                // Utiliser string() pour obtenir directement le contenu en tant que chaîne
                 val response = service.createGroupe(body, authToken!!).string()
-                Result.success(response)  // Retourne directement la chaîne de caractères
+                Result.success(response)
             } catch (e: HttpException) {
                 if (e.code() == 400) {
                     Result.success("Groupe créé avec succès !")
@@ -118,7 +117,6 @@ class GroupeRepository(private val service: CodeFirstService) {
                 val jsonResponse = JSONObject(response.string())
                 Result.success(jsonResponse.getString("message"))
             } catch (e: HttpException) {
-                // Gérer spécifiquement l'erreur 404
                 if (e.code() == 404) {
                     Result.failure(Exception("Le groupe $nomGroupe n'existe pas."))
                 } else if (e.code() == 400) {
@@ -151,8 +149,7 @@ class GroupeRepository(private val service: CodeFirstService) {
                 val jsonResponse = JSONObject(response.string())
                 Result.success(jsonResponse.getString("message"))
             } catch (e: HttpException) {
-                // Même si on a une erreur HTTP 400, l'utilisateur a peut-être bien quitté le groupe
-                // On retourne un succès avec message générique
+
                 if (e.code() == 400) {
                     Result.success("L'utilisateur $nomUtilisateur a quitté le groupe $nomGroupe avec succès.")
                 } else {

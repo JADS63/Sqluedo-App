@@ -3,13 +3,13 @@ package com.sqluedo.data.model
 object Stub {
     val enquetes = listOf(
         Enquete(
-            id = 1,  // Int au lieu de String
-            nomCreateur = "admin_prof",  // Nouveau champ requis
-            nom = "Enquête n1",  // Reste "nom" dans la classe, mais sera sérialisé en "titre"
+            id = 1,
+            nomCreateur = "admin_prof",
+            nom = "Enquête n1",
             description = "Analyse de la satisfaction des clients pour le trimestre en cours.",
-            difficulteIntermediare = 3,  // Garde l'orthographe originale
-            difficulteDificile = 5,  // Garde l'orthographe originale
-            mld = "Table utilisateur(NomUtilisateur, Mdp, Role, NomGroupe)",  // Nouveau champ requis
+            difficulteIntermediare = 3,
+            difficulteDificile = 5,
+            mld = "Table utilisateur(NomUtilisateur, Mdp, Role, NomGroupe)",
             solution = "Solution de l'enquête n1",
             indice = "Indice de l'enquête n1",
             nomDatabase = "Database1"

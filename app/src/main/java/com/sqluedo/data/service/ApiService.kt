@@ -38,26 +38,22 @@ data class RegisterResponse(
 )
 
 interface CodeFirstService {
-    // Endpoint de connexion
     @POST("Auth/login")
     @Headers("Content-Type: application/json")
     suspend fun login(@Body requestBody: RequestBody): ResponseBody
 
-    // Vérifier si un utilisateur existe
     @GET("Utilisateur/exist/{name}")
     suspend fun checkUserExists(
         @Path("name") name: String,
         @Header("Authorization") token: String
     ): Boolean
 
-    // Récupérer un utilisateur par son nom
     @GET("Utilisateur/{nom}")
     suspend fun getUserByName(
         @Path("nom") nom: String,
         @Header("Authorization") token: String
     ): Utilisateur
 
-    // Inscrire un nouvel utilisateur
     @POST("Utilisateur/insert")
     suspend fun registerUser(
         @Query("name") name: String,
@@ -65,7 +61,6 @@ interface CodeFirstService {
         @Header("Authorization") token: String
     ): RegisterResponse
 
-    // Récupérer la liste des enquêtes
     @GET("Enquete")
     suspend fun listEnquetesSuspend(
         @Header("Authorization") token: String,
@@ -73,28 +68,25 @@ interface CodeFirstService {
         @Query("count") count: Int = 10
     ): PaginatedResponse<Enquete>
 
-    // Récupérer une enquête par son nom
     @GET("Enquete/{enquete}")
     suspend fun enqueteParNomSuspend(
         @Path("enquete") enqueteName: String,
         @Header("Authorization") token: String
     ): Enquete
 
-    // Récupérer une solution par l'id de l'enquête
+
     @GET("Enquete/{id}/solution")
     suspend fun enqueteSolutionParIdSuspend(
         @Path("id") enqueteId: Int,
         @Header("Authorization") token: String
     ): String
 
-    // Récupérer une database par l'id de l'enquête
     @GET("Enquete/{id}/database")
     suspend fun enqueteDatabaseParIdSuspend(
         @Path("id") enqueteId: Int,
         @Header("Authorization") token: String
     ): String
 
-    // Récupérer la liste des groupes
     @GET("Groupe")
     suspend fun listGroupesSuspend(
         @Header("Authorization") token: String
@@ -107,14 +99,12 @@ interface CodeFirstService {
         @Header("Authorization") token: String
     ): ResponseBody
 
-    // Créer un nouveau groupe
     @POST("Groupe/creer")
     suspend fun createGroupe(
         @Body requestBody: RequestBody,
         @Header("Authorization") token: String
     ): ResponseBody
 
-    // Rejoindre un groupe
     @POST("Groupe/rejoindre")
     suspend fun joinGroupe(
         @Query("nomGroupe") nomGroupe: String,
@@ -122,7 +112,6 @@ interface CodeFirstService {
         @Header("Authorization") token: String
     ): ResponseBody
 
-    // Quitter un groupe
     @POST("Groupe/quitter")
     suspend fun leaveGroupe(
         @Query("nomGroupe") nomGroupe: String,

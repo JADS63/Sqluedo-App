@@ -72,7 +72,6 @@ class UtilisateurRepository(private val service: CodeFirstService) {
     suspend fun authenticateApi(): Boolean {
         return try {
             println("Tentative d'authentification API avec admin@sqluedo.com")
-            // Utiliser les identifiants d'API fixes (ceux qui fonctionnent)
             val requestBody = createLoginRequestBody("admin@sqluedo.com", "Admin123!")
             val response = service.login(requestBody)
             val jsonResponse = JSONObject(response.string())
@@ -95,7 +94,6 @@ class UtilisateurRepository(private val service: CodeFirstService) {
      * @return true si l'authentification a réussi, false sinon
      */
     suspend fun authenticateUser(username: String, password: String): Boolean {
-        // Vérifier d'abord que nous avons un token
         if (authToken == null) {
             println("Pas de token, tentative d'authentification API")
             val apiAuthenticated = authenticateApi()
@@ -107,7 +105,6 @@ class UtilisateurRepository(private val service: CodeFirstService) {
 
         return try {
             println("Vérification de l'existence de l'utilisateur $username")
-            // Utilisez ce token pour vérifier l'existence de l'utilisateur
             val userExists = service.checkUserExists(username, authToken!!)
             if (!userExists) {
                 println("Utilisateur non trouvé: $username")
@@ -115,10 +112,8 @@ class UtilisateurRepository(private val service: CodeFirstService) {
             }
 
             println("Récupération des informations de l'utilisateur $username")
-            // Récupérez l'utilisateur pour vérifier son mot de passe
             val user = service.getUserByName(username, authToken!!)
 
-            // Vérifiez que le mot de passe correspond
             if (user.mdp == password) {
                 println("Authentification réussie pour $username")
                 return true
@@ -180,11 +175,9 @@ class UtilisateurRepository(private val service: CodeFirstService) {
 
         return try {
             println("Appel de l'API d'inscription pour $username avec le token: ${authToken?.take(20)}...")
-            // Appel à l'API d'inscription
             val response = service.registerUser(username, password, authToken!!)
             println("Réponse de l'API d'inscription: $response")
 
-            // Vérifie si la réponse contient le nom d'utilisateur
             val success = response.nomUtilisateur == username
             println("Inscription réussie pour $username: $success")
             success

@@ -64,7 +64,7 @@ class GroupeListViewModel(private val repository: GroupeRepository) : ViewModel(
                 result.fold(
                     onSuccess = { message ->
                         _operationMessage.value = OperationMessage(message, OperationType.JOIN, true)
-                        loadGroupes() // Recharger la liste après avoir rejoint
+                        loadGroupes()
                     },
                     onFailure = {
                         _error.value = it.message ?: "Erreur lors de la tentative de rejoindre le groupe"
@@ -102,7 +102,7 @@ class GroupeListViewModel(private val repository: GroupeRepository) : ViewModel(
                 result.fold(
                     onSuccess = { message ->
                         _operationMessage.value = OperationMessage(message, OperationType.LEAVE, true)
-                        loadGroupes() // Recharger la liste après avoir quitté
+                        loadGroupes()
                     },
                     onFailure = {
                         _error.value = it.message ?: "Erreur lors de la tentative de quitter le groupe"

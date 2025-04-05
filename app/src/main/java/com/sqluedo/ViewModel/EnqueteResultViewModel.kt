@@ -45,7 +45,6 @@ class EnqueteResultViewModel(
             attemptCount++
 
             try {
-                // Utiliser directement la solution de l'enquête locale
                 val correctSolution = enquete.solution
 
                 val timeTaken = (System.currentTimeMillis() - startTime) / 1000
@@ -70,12 +69,7 @@ class EnqueteResultViewModel(
                     message = message
                 )
 
-                // Logs détaillés pour débogage
-                println("DEBUG - Submitted Answer: '$userAnswer'")
-                println("DEBUG - Cleaned User Answer: '$cleanedUserAnswer'")
-                println("DEBUG - Correct Solution: '$correctSolution'")
-                println("DEBUG - Cleaned Solution: '$cleanedCorrectSolution'")
-                println("DEBUG - Is Correct: $isCorrect")
+
 
             } catch (e: Exception) {
                 _errorMessage.value = "Erreur lors de la vérification : ${e.message}"

@@ -45,7 +45,6 @@ fun ConnectionScreen(
         AffichageEnTete(goHome)
         Spacer(modifier = Modifier.height(60.dp))
 
-        // Afficher un message d'erreur si nécessaire
         when (connexionState) {
             is ConnexionState.Error -> {
                 Text(
@@ -174,7 +173,7 @@ fun AffichageBoutonsConnexion(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Vous n'avez pas de compte ?",
+            text = stringResource(id =R.string.pascompte),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )

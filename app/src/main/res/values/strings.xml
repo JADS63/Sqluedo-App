@@ -1,55 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Général -->
+    <!-- ==================== GÉNÉRAUX ==================== -->
     <string name="app_name">SQLuedo</string>
     <string name="hello_blank_fragment">Bonjour</string>
     <string name="image">Image</string>
+    <string name="btn_retour">Retour</string>
+    <string name="btn_close">Fermer</string>
+    <string name="btn_home">Accueil</string>
+    <string name="btn_valider">Valider</string>
+    <string name="btn_reessayer">Réessayer</string>
+    <string name="fermer">Fermer</string>
+    <string name="suivant">Suivant</string>
+    <string name="annuler">Annuler</string>
+    <string name="unknown_error">Erreur inconnue</string>
+    <string name="null_value">NULL</string>
+    <string name="Chargement">Chargement en cours...</string>
+    <string name="ErrChargement">Erreur de chargement</string>
 
-    <!-- Connexion et Authentification -->
+    <!-- ==================== AUTHENTIFICATION ==================== -->
     <string name="nom">Nom</string>
     <string name="mdp">Mot de passe</string>
     <string name="NouveauCompte">Nouveau Compte</string>
     <string name="SeConnecter">Se Connecter</string>
     <string name="CreerCompte">Créer Compte</string>
     <string name="titre_nouveau_compte">Nouveau Compte</string>
-    <string name="Chargement">Chargement en cours...</string>
+    <string name="pascompte">Vous n\'avez pas de compte ?</string>
+    <string name="connfirmermdp">Confirmer le mot de passe</string>
+    <string name="mdppasegaux">Les mots de passe ne correspondent pas</string>
+    <string name="compteexistant">Déjà un compte ? Se connecter</string>
+    <string name="deco">Déconnexion</string>
+    <string name="refresh">Rafraîchir mes informations</string>
 
-
-    <!-- Navigation -->
-    <string name="btn_retour">Retour</string>
-    <string name="btn_home">Accueil</string>
-    <string name="btn_valider">Valider</string>
+    <!-- ==================== ÉCRAN ACCUEIL ==================== -->
+    <string name="titre_app">Sqluedo</string>
+    <string name="ErrEnqueteVide">Aucune enquête disponible</string>
     <string name="btn_jouer">Jouer</string>
 
-    <!-- Écran Accueil -->
-    <string name="titre_app">Sqluedo</string>
-    <string name="ErrChargement">Erreur de chargement</string>
-    <string name="ErrEnqueteVide">Aucune enquête disponible</string>
-    <string name="btn_reessayer">Réessayer</string>
-
-    <!-- Écran Enquête -->
+    <!-- ==================== ÉCRAN ENQUÊTE ==================== -->
     <string name="titre_description">Description</string>
     <string name="mcd_description">Diagramme de modèle conceptuel des données</string>
 
-    <!-- Écran Jeu -->
+    <!-- ==================== BASE DE DONNÉES ==================== -->
+    <string name="shemabdd">Schéma de base de données</string>
+    <string name="tablesbdd">Voir les tables</string>
+    <string name="mld">Modèle Logique de Données (MLD)</string>
+    <string name="database_icon_desc">Base de donnée</string>
+    <string name="mld_title">Modèle Logique de Données (MLD)</string>
+    <string name="database_name">Base de données: %1$s</string>
+    <string name="available_tables">Tables disponibles:</string>
+    <string name="table_bullet_item">• %1$s</string>
+    <string name="error_loading_tables">Erreur lors du chargement des tables: %1$s</string>
+    <string name="error_fetch_db_structure">Impossible de récupérer la structure de la base de données</string>
+    <string name="error_generic">Erreur: %1$s</string>
+
+    <!-- ==================== ÉCRAN JEU ==================== -->
+    <string name="title_jeu_screen">SQLuedo - Mode Jeu</string>
     <string name="label_requete">Requête</string>
     <string name="label_resultat">Résultat</string>
     <string name="label_reponse">Réponse</string>
     <string name="menu">Menu</string>
+    <string name="attempts_count">Tentatives : %1$d</string>
+    <string name="elapsed_time">Temps : %1$ds</string>
+    <string name="show_hint">Afficher indice</string>
+    <string name="btn_execute_query">Exécuter la requête</string>
+    <string name="btn_validate_investigation">Valider l\'enquête</string>
+    <string name="hint_prefix">Indice : %1$s</string>
+    <string name="query_results">Résultats de la requête</string>
 
-    <!-- Écran Groupe -->
+    <!-- ==================== ÉDITEUR SQL ==================== -->
+    <string name="sql_queries">Requêtes SQL</string>
+    <string name="sql_query_placeholder">Écrivez votre requête SQL ici…</string>
+    <string name="result_count">%1$d résultat(s)</string>
+    <string name="empty_state_message">Exécutez une requête SQL pour voir les résultats</string>
+    <string name="query_success">Requête exécutée avec succès</string>
+    <string name="no_results_returned">Aucun résultat retourné</string>
+    <string name="query_execution_error">Erreur lors de l\'exécution de la requête</string>
+
+    <!-- ==================== ÉCRAN RÉSULTAT ==================== -->
+    <string name="success_label">RÉUSSI !</string>
+    <string name="statistics_title">Statistiques</string>
+    <string name="attempts_label">Tentatives</string>
+    <string name="time_label">Temps</string>
+    <string name="investigation_solution">Solution de l\'enquête</string>
+    <string name="return_to_home">Retour à l\'accueil</string>
+
+    <!-- ==================== GROUPES ==================== -->
     <string name="btn_Groupe">Groupe</string>
+    <string name="btn_quitter_groupe">Quitter Groupe</string>
+    <string name="btn_rejoindre_groupe">Rejoindre Groupe</string>
+    <string name="btn_creer_groupe">Créer un groupe</string>
+    <string name="nomgroupe">Nom du groupe</string>
+    <string name="code">Code d\'accès</string>
+    <string name="quittergroupe">Vous avez quitté le groupe.</string>
 
-    <!-- Écran Informations -->
+    <!-- ==================== ÉCRAN INFORMATIONS ==================== -->
     <string name="label_nom">Nom</string>
     <string name="label_groupe">Groupe</string>
     <string name="titre_statistiques">Statistiques</string>
     <string name="badge_reussite">Badge de réussite</string>
     <string name="text_reussite">Réussite</string>
     <string name="pourcentage_reussite">100 %</string>
-
-    <!-- Boutons de groupe -->
-    <string name="btn_quitter_groupe">Quitter Groupe</string>
-    <string name="btn_rejoindre_groupe">Rejoindre Groupe</string>
-    <string name="btn_creer_groupe">Créer un groupe</string>
 </resources>

@@ -197,11 +197,11 @@ fun PaginationControls(
                     disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                 )
             ) {
-                Text("Suivant")
+                Text(stringResource(id = R.string.suivant))
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Default.ArrowForward,
-                    contentDescription = "Suivant",
+                    contentDescription = stringResource(id = R.string.suivant),
                     modifier = Modifier.size(20.dp)
                 )
             }

@@ -1,6 +1,5 @@
 package com.sqluedo.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,14 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.sqluedo.R
 import com.sqluedo.data.model.Enquete
 import com.sqluedo.data.model.Stub
@@ -47,13 +43,11 @@ fun EnqueteScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // TopBar moderne avec actions
             TopAppBar(
                 goHome = goHome,
                 goConnection = goConnection
             )
 
-            // Contenu principal avec défilement
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -72,7 +66,6 @@ fun EnqueteScreen(
                 EnqueteSchemaData(enquete = enquete)
             }
 
-            // Bouton d'action principal
             EnqueteActionButton(
                 goJeu = goJeu
             )
@@ -214,7 +207,7 @@ fun EnqueteSchemaData(enquete: Enquete) {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Schéma de base de données",
+                text = stringResource(R.string.shemabdd),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -226,37 +219,10 @@ fun EnqueteSchemaData(enquete: Enquete) {
                 onClick = { showDatabaseDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Voir les tables")
+                Text(stringResource(R.string.tablesbdd))
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
-//            // Indice sous forme d'élément extensible
-//            OutlinedButton(
-//                onClick = { expanded = !expanded },
-//                modifier = Modifier.align(Alignment.End),
-//                colors = ButtonDefaults.outlinedButtonColors(
-//                    contentColor = MaterialTheme.colorScheme.primary
-//                )
-//            ) {
-//                Text(text = if (expanded) "Masquer l'indice" else "Afficher l'indice")
-//            }
-//
-//            if (expanded) {
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Surface(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-//                    shape = RoundedCornerShape(8.dp)
-//                ) {
-//                    Text(
-//                        text = enquete.indice,
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        modifier = Modifier.padding(12.dp),
-//                        color = MaterialTheme.colorScheme.primary
-//                    )
-//                }
-//            }
         }
     }
 
@@ -275,23 +241,19 @@ fun MldDialog(
 ) {
     val repository = EnqueteRepository(createCodeFirstService())
 
-    // État pour stocker les tables de la base de données actuelle
     var tables by remember { mutableStateOf<List<String>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    // Charger les tables de la base de données au démarrage
     LaunchedEffect(enquete.nomDatabase) {
         isLoading = true
         error = null
 
         try {
-            // S'assurer que nous avons un token d'authentification
             if (repository.getAuthToken() == null) {
                 repository.login("admin@sqluedo.com", "Admin123!")
             }
 
-            // Exécuter la requête pour obtenir les tables
             val service = createCodeFirstService()
             val requestBody = JSONObject().apply {
                 put("databaseName", enquete.nomDatabase)
@@ -302,7 +264,6 @@ fun MldDialog(
                 service.executeQuery(requestBody, token)
             }
 
-            // Parser la réponse
             if (response != null) {
                 val responseJson = JSONObject(response.string())
                 if (responseJson.getBoolean("success")) {
@@ -328,7 +289,7 @@ fun MldDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Modèle Logique de Données (MLD)") },
+        title = { stringResource(R.string.mld) },
         text = {
             Column(
                 modifier = Modifier
@@ -360,9 +321,8 @@ fun MldDialog(
                         modifier = Modifier.padding(16.dp)
                     )
                 } else {
-                    // Liste simple des tables
                     Text(
-                        text = "Tables disponibles:",
+                        text = stringResource(id = R.string.tablesbdd),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -389,7 +349,7 @@ fun MldDialog(
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("Fermer")
+                Text(stringResource(id = R.string.fermer))
             }
         }
     )

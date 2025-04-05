@@ -2,9 +2,7 @@ package com.sqluedo.data.repository
 
 import com.sqluedo.data.service.CodeFirstService
 import kotlinx.serialization.Serializable
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import okhttp3.MediaType.Companion.toMediaType
 
 class StatistiquesRepository(
     private val service: CodeFirstService,
@@ -23,7 +21,6 @@ class StatistiquesRepository(
         tempsPasse: Int,
         reussi: Boolean
     ): StatResponse {
-        // Vérifier la validité des paramètres
         println("Paramètres de mise à jour des statistiques:")
         println("Nom utilisateur: $nomUtilisateur")
         println("ID Enquête: $idEnquete")
@@ -31,11 +28,9 @@ class StatistiquesRepository(
         println("Temps passé: $tempsPasse")
         println("Réussi: $reussi")
 
-        // Récupérer le token d'authentification
         val token = utilisateurRepository.getAuthToken()
             ?: throw IllegalStateException("Aucun token d'authentification")
 
-        // Effectuer la requête à l'API
         return try {
             val response = service.updateBestStats(
                 nomUtilisateur = nomUtilisateur,

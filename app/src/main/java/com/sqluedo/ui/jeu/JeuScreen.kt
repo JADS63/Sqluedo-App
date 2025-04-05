@@ -1,19 +1,9 @@
-@file:Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-
 package com.sqluedo.ui.jeu
 
-import android.content.ClipData
-import android.content.ClipDescription
-import android.view.View
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
@@ -32,19 +21,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -52,231 +31,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqluedo.R
 import com.sqluedo.ViewModel.EnqueteResultViewModel
-import com.sqluedo.ViewModel.JeuBlocViewModel
+import com.sqluedo.ViewModel.JeuPersistenceViewModel
 import com.sqluedo.ViewModel.PlayQueryViewModel
 import com.sqluedo.ViewModel.QueryResult
-import com.sqluedo.ViewModel.VerificationResult
-import com.sqluedo.data.model.BlocSQL
+import com.sqluedo.data.local.SQLuedoDatabase
 import com.sqluedo.data.model.Enquete
-import com.sqluedo.data.model.Stub
-import com.sqluedo.data.model.getColorForType
 import com.sqluedo.data.repository.EnqueteRepository
+import com.sqluedo.data.repository.JeuProgressionRepository
+import com.sqluedo.data.repository.UtilisateurRepository
 import com.sqluedo.data.service.createCodeFirstService
 import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import kotlin.math.roundToInt
 
-// ---------------------------------------------------------
-// Data class pour représenter un bloc de la palette
-// ---------------------------------------------------------
-data class PuzzleData(val label: String, val color: Color)
-
-// ---------------------------------------------------------
-// Composant PuzzleBlock : bloc de puzzle avec forme personnalisée
-// ---------------------------------------------------------
 @Composable
-fun PuzzleBlock(
-    text: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(width = 120.dp, height = 50.dp)
-            .background(color = color, shape = PuzzlePieceShape)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text, color = Color.White, fontWeight = FontWeight.Bold)
-    }
-}
-
-// ---------------------------------------------------------
-// Forme personnalisée pour simuler une pièce de puzzle
-// ---------------------------------------------------------
-val PuzzlePieceShape: Shape = object : Shape {
-    override fun createOutline(
-        size: androidx.compose.ui.geometry.Size,
-        layoutDirection: LayoutDirection,
-        density: Density
-    ): Outline {
-        with(density) {
-            val notchWidth = 20.dp.toPx()
-            val notchHeight = 8.dp.toPx()
-            val path = Path().apply {
-                // Encoche en haut à gauche
-                moveTo(0f, notchHeight)
-                lineTo(0f, size.height - notchHeight)
-                // Tenon en bas à gauche
-                lineTo(0f, size.height)
-                lineTo(notchWidth, size.height)
-                lineTo(notchWidth, size.height - notchHeight)
-                // Ligne de bas jusqu'au coin droit
-                lineTo(size.width, size.height - notchHeight)
-                // Bord droit
-                lineTo(size.width, 0f)
-                // Encoche en haut
-                lineTo(notchWidth, 0f)
-                lineTo(notchWidth, notchHeight)
-                lineTo(0f, notchHeight)
-                close()
-            }
-            return Outline.Generic(path)
-        }
-    }
-}
-
-// ---------------------------------------------------------
-// Composant PuzzleDragDropEditor : éditeur drag & drop de blocs puzzle
-// ---------------------------------------------------------
-@Composable
-fun PuzzleDragDropEditor(
-    blocsSQL: List<BlocSQL>,
-    onAjouterBloc: (BlocSQL) -> Unit
-) {
-    // Palette de blocs
-    val palette = listOf(
-        PuzzleData("SELECT", getColorForType("SELECT")),
-        PuzzleData("FROM", getColorForType("FROM")),
-        PuzzleData("WHERE", getColorForType("WHERE"))
-    )
-    // Gestion du drag & drop
-    var draggedBlock by remember { mutableStateOf<PuzzleData?>(null) }
-    var dragStart by remember { mutableStateOf(Offset.Zero) }
-    var dragOffset by remember { mutableStateOf(Offset.Zero) }
-    var dropZoneBounds by remember { mutableStateOf<Rect?>(null) }
-    val density = LocalDensity.current
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Palette de blocs en haut
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Palette :", fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                palette.forEach { data ->
-                    Box(
-                        modifier = Modifier.pointerInput(data) {
-                            detectDragGestures(
-                                onDragStart = { offset ->
-                                    draggedBlock = data
-                                    dragStart = offset
-                                    dragOffset = Offset.Zero
-                                },
-                                onDrag = { change, dragAmount ->
-                                    change.consume()
-                                    dragOffset += dragAmount
-                                },
-                                onDragEnd = {
-                                    val finalPos = dragStart + dragOffset
-                                    if (dropZoneBounds?.contains(finalPos) == true && draggedBlock != null) {
-                                        onAjouterBloc(
-                                            BlocSQL(
-                                                type = draggedBlock!!.label,
-                                                couleur = draggedBlock!!.color
-                                            )
-                                        )
-                                    }
-                                    draggedBlock = null
-                                    dragOffset = Offset.Zero
-                                },
-                                onDragCancel = {
-                                    draggedBlock = null
-                                    dragOffset = Offset.Zero
-                                }
-                            )
-                        }
-                    ) {
-                        PuzzleBlock(text = data.label, color = data.color)
-                    }
-                }
-            }
-        }
-        // Zone de dépôt en bas
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .onGloballyPositioned { coords ->
-                    dropZoneBounds = coords.boundsInWindow()
-                },
-            border = BorderStroke(2.dp, Color.DarkGray),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                if (blocsSQL.isEmpty()) {
-                    Text(
-                        text = "Déposez ici vos blocs",
-                        color = Color.Gray,
-                        modifier = Modifier.align(Alignment.Center),
-                        textAlign = TextAlign.Center
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(blocsSQL) { bloc ->
-                            PuzzleBlock(
-                                text = bloc.type,
-                                color = bloc.couleur,
-                                modifier = Modifier.padding(4.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        // Overlay du bloc en cours de drag
-        if (draggedBlock != null) {
-            val currentPos = dragStart + dragOffset
-            val offsetX = currentPos.x.roundToInt()
-            val offsetY = currentPos.y.roundToInt()
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(offsetX, offsetY) }
-                    .wrapContentSize()
-            ) {
-                PuzzleBlock(text = draggedBlock!!.label, color = draggedBlock!!.color)
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------
-// Composant InfoJeu : affiche le nombre de tentatives et le temps écoulé
-// ---------------------------------------------------------
-@Composable
-fun InfoJeu(attempts: Int, elapsedSeconds: Long) {
+fun InfoJeu(attempts: Int, elapsedSeconds: Long, totalAttempts: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("Tentatives : $attempts", style = MaterialTheme.typography.bodyMedium)
-        Text("Temps : ${elapsedSeconds}s", style = MaterialTheme.typography.bodyMedium)
+        Column {
+            Text(
+                stringResource(id = R.string.attempts_count, attempts),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                "Total: $totalAttempts tentatives",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Text(
+            stringResource(id = R.string.elapsed_time, elapsedSeconds),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
-// ---------------------------------------------------------
-// Adaptation de JeuScreen pour intégrer l'éditeur puzzle, le compteur, le timer et l'indice
-// ---------------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JeuScreen(
@@ -284,80 +81,82 @@ fun JeuScreen(
     goResultat: (Int, Long) -> Unit,
     enquete: Enquete
 ) {
-    // Repository et ViewModels
-    val repository = EnqueteRepository(createCodeFirstService())
+    val context = LocalContext.current
+    val codeFirstService = createCodeFirstService()
+    val repository = EnqueteRepository(codeFirstService)
+    val utilisateurRepository = UtilisateurRepository(codeFirstService)
+
+    val database = SQLuedoDatabase.getDatabase(context)
+    val jeuProgressionRepository = JeuProgressionRepository(database.jeuProgressionDao())
+
     val queryViewModel = remember { PlayQueryViewModel(enquete, repository) }
     val resultViewModel = remember { EnqueteResultViewModel(enquete, repository) }
-    val blocViewModel = remember { JeuBlocViewModel() }
+    val persistenceViewModel: JeuPersistenceViewModel = viewModel(
+        factory = JeuPersistenceViewModel.Factory(jeuProgressionRepository, utilisateurRepository)
+    )
 
-    // États observés
     val isLoadingQuery by queryViewModel.isLoading.collectAsState()
     val queryResult by queryViewModel.queryResult.collectAsState()
     val queryErrorMessage by queryViewModel.errorMessage.collectAsState()
     val isLoadingResult by resultViewModel.isLoading.collectAsState()
     val verificationResult by resultViewModel.verificationResult.collectAsState()
     val resultErrorMessage by resultViewModel.errorMessage.collectAsState()
-    val modeBlocActif by blocViewModel.modeBlocActif.collectAsState()
-    val blocsSQL by blocViewModel.blocsSQL.collectAsState()
-    val requeteSQL by blocViewModel.requeteSQL.collectAsState()
 
-    // Variable pour le champ de réponse
+    val totalAttempts by persistenceViewModel.nbTentatives.collectAsState()
+    val persistenceError by persistenceViewModel.error.collectAsState()
+
+    var requeteSQL by remember { mutableStateOf("") }
     var reponseText by remember { mutableStateOf("") }
-
-    // Nouveaux états pour le compteur de tentatives et le timer
     var attemptCount by remember { mutableStateOf(0) }
     var elapsedTime by remember { mutableStateOf(0L) }
-    // État pour afficher l'indice
     var showHint by remember { mutableStateOf(false) }
 
-    // Timer : incrémente le temps chaque seconde
+    LaunchedEffect(enquete) {
+        persistenceViewModel.initEnquete(enquete)
+    }
+
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000L)
             elapsedTime++
+            persistenceViewModel.updateTime(elapsedTime)
         }
     }
 
-    // Navigation vers l'écran de résultat
     LaunchedEffect(verificationResult) {
         if (verificationResult?.isCorrect == true) {
+            persistenceViewModel.recordSuccess()
             delay(1500)
             goResultat(attemptCount, elapsedTime)
         }
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // Passer l'enquête au TopBar pour accéder au MLD
         TopBar(goHome, enquete)
         Spacer(modifier = Modifier.height(8.dp))
-        // Affichage du compteur et du timer
-        InfoJeu(attempts = attemptCount, elapsedSeconds = elapsedTime)
+
+        persistenceError?.let { error ->
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
+        InfoJeu(
+            attempts = attemptCount,
+            elapsedSeconds = elapsedTime,
+            totalAttempts = totalAttempts
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        // Switch pour basculer entre mode puzzle et mode texte
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = if (modeBlocActif) "Mode puzzle" else "Mode texte", fontSize = 14.sp)
-            Spacer(modifier = Modifier.width(8.dp))
-            Switch(checked = modeBlocActif, onCheckedChange = { blocViewModel.basculerMode() })
-        }
+
+        TextEditorUI(
+            requeteSQL = requeteSQL,
+            onRequeteChanged = { requeteSQL = it }
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
-        // Choix de l'éditeur en fonction du mode
-        if (modeBlocActif) {
-            PuzzleDragDropEditor(
-                blocsSQL = blocsSQL,
-                onAjouterBloc = { blocViewModel.ajouterBloc(it) }
-            )
-        } else {
-            TextEditorUI(
-                requeteSQL = requeteSQL,
-                onRequeteChanged = { blocViewModel.mettreAJourRequeteTexte(it) }
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        // Section de réponse utilisateur avec icône de loupe pour afficher l'indice
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -365,7 +164,6 @@ fun JeuScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Champ de réponse
             OutlinedTextField(
                 value = reponseText,
                 onValueChange = { reponseText = it },
@@ -382,7 +180,6 @@ fun JeuScreen(
                 isError = verificationResult?.isCorrect == false
             )
 
-            // Icône loupe pour afficher l'indice (si attemptCount > enquete.difficulteDifficile)
             IconButton(
                 onClick = {
                     if (attemptCount > enquete.difficulteDificile) {
@@ -392,22 +189,21 @@ fun JeuScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Afficher indice"
+                    contentDescription = stringResource(id = R.string.show_hint)
                 )
             }
         }
 
-        // Boutons d'action : "Exécuter la requête" et "Valider l'enquête"
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Bouton pour exécuter la requête SQL
             Button(
                 onClick = {
                     attemptCount++
-                    queryViewModel.executeQuery(blocViewModel.getRequeteSQL())
+                    persistenceViewModel.recordAttempt()
+                    queryViewModel.executeQuery(requeteSQL)
                 },
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
@@ -428,10 +224,9 @@ fun JeuScreen(
                     )
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Exécuter la requête")
+                Text(text = stringResource(id = R.string.btn_execute_query))
             }
 
-            // Bouton pour valider l'enquête (vérifier la réponse)
             Button(
                 onClick = {
                     resultViewModel.verifyAnswer(reponseText)
@@ -458,10 +253,9 @@ fun JeuScreen(
                     )
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Valider l'enquête")
+                Text(text = stringResource(id = R.string.btn_validate_investigation))
             }
         }
-        // Affichage de l'indice si demandé
         if (showHint) {
             Row(
                 modifier = Modifier
@@ -471,14 +265,13 @@ fun JeuScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Indice : ${enquete.indice}",
+                    text = stringResource(id = R.string.hint_prefix, enquete.indice),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        // Tableau de résultats
         Card(
             modifier = Modifier.fillMaxWidth().weight(1f).padding(vertical = 8.dp),
             border = BorderStroke(1.dp, Color.Gray),
@@ -487,7 +280,7 @@ fun JeuScreen(
         ) {
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 Text(
-                    text = "Résultats de la requête",
+                    text = stringResource(id = R.string.query_results),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -508,7 +301,7 @@ fun JeuScreen(
                             } else if (result.success && result.rowCount == 0) {
                                 EmptyResultMessage()
                             } else {
-                                ErrorMessage(message = result.errorMessage ?: "Erreur inconnue")
+                                ErrorMessage(message = result.errorMessage ?: stringResource(id = R.string.unknown_error))
                             }
                         }
                     }
@@ -538,21 +331,19 @@ fun TopBar(goHome: () -> Unit, enquete: Enquete) {
                 modifier = Modifier.size(48.dp).clip(RoundedCornerShape(16.dp))
             )
         }
-        Text(text = "SQLuedo - Mode Jeu", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Text(text = stringResource(id = R.string.title_jeu_screen), fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Row {
 
-            // Icône de base de données pour afficher le MLD
             IconButton(onClick = { showMLDDialog = true }) {
                 Icon(
                     painter = painterResource(id = R.drawable.database),
-                    contentDescription = "Base de donnée",
+                    contentDescription = stringResource(id = R.string.database_icon_desc),
                     modifier = Modifier.size(32.dp)
                 )
             }
         }
     }
 
-    // Afficher le dialog avec l'image MLD quand on clique sur l'icône
     if (showMLDDialog) {
         MLDDialog(
             enquete = enquete,
@@ -560,6 +351,7 @@ fun TopBar(goHome: () -> Unit, enquete: Enquete) {
         )
     }
 }
+
 @Composable
 fun MLDDialog(
     enquete: Enquete,
@@ -567,23 +359,19 @@ fun MLDDialog(
 ) {
     val repository = EnqueteRepository(createCodeFirstService())
 
-    // État pour stocker les tables de la base de données actuelle
     var tables by remember { mutableStateOf<List<String>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    // Charger les tables de la base de données au démarrage
     LaunchedEffect(enquete.nomDatabase) {
         isLoading = true
         error = null
 
         try {
-            // S'assurer que nous avons un token d'authentification
             if (repository.getAuthToken() == null) {
                 repository.login("admin@sqluedo.com", "Admin123!")
             }
 
-            // Exécuter la requête pour obtenir les tables
             val service = createCodeFirstService()
             val requestBody = JSONObject().apply {
                 put("databaseName", enquete.nomDatabase)
@@ -594,7 +382,6 @@ fun MLDDialog(
                 service.executeQuery(requestBody, token)
             }
 
-            // Parser la réponse
             if (response != null) {
                 val responseJson = JSONObject(response.string())
                 if (responseJson.getBoolean("success")) {
@@ -608,11 +395,11 @@ fun MLDDialog(
 
                     tables = tableList
                 } else {
-                    error = "Impossible de récupérer la structure de la base de données"
+                    error = "erreur"
                 }
             }
         } catch (e: Exception) {
-            error = "Erreur: ${e.message}"
+            error = "erreur"
         } finally {
             isLoading = false
         }
@@ -620,7 +407,7 @@ fun MLDDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Modèle Logique de Données (MLD)") },
+        title = { Text(stringResource(id = R.string.mld_title)) },
         text = {
             Column(
                 modifier = Modifier
@@ -630,7 +417,7 @@ fun MLDDialog(
                     .padding(8.dp)
             ) {
                 Text(
-                    text = "Base de données: ${enquete.nomDatabase}",
+                    text = stringResource(id = R.string.database_name, enquete.nomDatabase),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -647,14 +434,13 @@ fun MLDDialog(
                     }
                 } else if (error != null) {
                     Text(
-                        text = "Erreur lors du chargement des tables: $error",
+                        text = stringResource(id = R.string.error_loading_tables, error ?: ""),
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(16.dp)
                     )
                 } else {
-                    // Liste simple des tables
                     Text(
-                        text = "Tables disponibles:",
+                        text = stringResource(id = R.string.available_tables),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -669,7 +455,7 @@ fun MLDDialog(
                         Column(modifier = Modifier.padding(12.dp)) {
                             tables.forEach { tableName ->
                                 Text(
-                                    text = "• $tableName",
+                                    text = stringResource(id = R.string.table_bullet_item, tableName),
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 )
@@ -677,13 +463,11 @@ fun MLDDialog(
                         }
                     }
                 }
-
-
             }
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("Fermer")
+                Text(stringResource(id = R.string.btn_close))
             }
         }
     )
@@ -715,21 +499,7 @@ fun TableCard(tableName: String, description: String) {
     }
 }
 
-// Fonction utilitaire pour vérifier si une chaîne est en format Base64
-private fun isBase64(input: String): Boolean {
-    return try {
-        android.util.Base64.decode(input, android.util.Base64.DEFAULT)
-        true
-    } catch (e: Exception) {
-        false
-    }
-}
-
-// ---------------------------------------------------------
-// Fonctions complémentaires pour éditeur texte et affichage des résultats
-// ---------------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
 fun TextEditorUI(
     requeteSQL: String,
@@ -750,7 +520,7 @@ fun TextEditorUI(
     ) {
         Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
             Text(
-                text = "Requêtes SQL",
+                text = stringResource(id = R.string.sql_queries),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -762,63 +532,12 @@ fun TextEditorUI(
                     onRequeteChanged(it.text)
                 },
                 modifier = Modifier.fillMaxWidth().weight(1f),
-                placeholder = { Text("Écrivez votre requête SQL ici...") },
+                placeholder = { Text(stringResource(id = R.string.sql_query_placeholder)) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     unfocusedBorderColor = Color.LightGray,
                     focusedBorderColor = MaterialTheme.colorScheme.primary
                 )
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BlocSQLItem(
-    bloc: BlocSQL,
-    onDelete: () -> Unit,
-    onUpdate: (BlocSQL) -> Unit
-) {
-    var valeur by remember { mutableStateOf(bloc.valeur) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .background(bloc.couleur.copy(alpha = 0.2f))
-            .border(1.dp, bloc.couleur, RoundedCornerShape(4.dp))
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            shape = RoundedCornerShape(4.dp),
-            color = bloc.couleur,
-            modifier = Modifier.padding(end = 8.dp)
-        ) {
-            Text(
-                text = bloc.type,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                fontSize = 14.sp
-            )
-        }
-        OutlinedTextField(
-            value = valeur,
-            onValueChange = {
-                valeur = it
-                onUpdate(bloc.copy(valeur = it))
-            },
-            modifier = Modifier.weight(1f).height(40.dp),
-            placeholder = { Text("Valeur...") },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent,
-                containerColor = Color.White.copy(alpha = 0.5f)
-            ),
-            singleLine = true
-        )
-        IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = "Supprimer", tint = Color.Gray)
         }
     }
 }
@@ -833,7 +552,7 @@ fun ResultTable(queryResult: QueryResult) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${queryResult.rowCount} résultat(s)",
+                text = stringResource(id = R.string.result_count, queryResult.rowCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -871,7 +590,7 @@ fun ResultTable(queryResult: QueryResult) {
                                 .padding(vertical = 8.dp, horizontal = 16.dp)
                         ) {
                             queryResult.columns.forEach { column ->
-                                val value = row[column.name]?.toString() ?: "NULL"
+                                val value = row[column.name]?.toString() ?: stringResource(id = R.string.null_value)
                                 Text(
                                     text = value,
                                     modifier = Modifier.padding(end = 16.dp).width(120.dp),
@@ -892,7 +611,7 @@ fun ResultTable(queryResult: QueryResult) {
 fun EmptyStateMessage() {
     Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
         Text(
-            text = "Exécutez une requête SQL pour voir les résultats",
+            text = stringResource(id = R.string.empty_state_message),
             color = Color.Gray,
             textAlign = TextAlign.Center
         )
@@ -909,14 +628,14 @@ fun EmptyResultMessage() {
             Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Requête exécutée avec succès",
+                text = stringResource(id = R.string.query_success),
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Aucun résultat retourné",
+                text = stringResource(id = R.string.no_results_returned),
                 color = Color.Gray,
                 textAlign = TextAlign.Center
             )
@@ -934,7 +653,7 @@ fun ErrorMessage(message: String) {
             Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Erreur lors de l'exécution de la requête",
+                text = stringResource(id = R.string.query_execution_error),
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold
@@ -948,5 +667,3 @@ fun ErrorMessage(message: String) {
         }
     }
 }
-
-

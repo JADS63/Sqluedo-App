@@ -23,32 +23,26 @@ class GroupOrStringSerializer : KSerializer<Group?> {
         if (value == null) {
             encoder.encodeNull()
         } else {
-            // Lors de la sérialisation, on utilise le nom du groupe
             encoder.encodeString(value.nom)
         }
     }
 
     override fun deserialize(decoder: Decoder): Group? {
-        // Vérifier si la valeur est null
         if (decoder is JsonDecoder) {
             val element = decoder.decodeJsonElement()
 
-            // Si c'est une chaîne simple
             if (element is JsonPrimitive && element.isString) {
                 val nomGroupe = element.jsonPrimitive.content
-                // Créer un objet Group temporaire avec les informations minimales
                 return Group(
                     nom = nomGroupe,
-                    code = "",  // Code inconnu
-                    nbUtilisateur = 0,  // Nombre d'utilisateurs inconnu
-                    nomCreator = null  // Créateur inconnu
+                    code = "",
+                    nbUtilisateur = 0,
+                    nomCreator = null
                 )
             }
-            // Si c'est null
             return null
         }
 
-        // Fallback en cas d'erreur
         return null
     }
 }

@@ -55,7 +55,6 @@ class GroupeDetailViewModel(
                 result.fold(
                     onSuccess = {
                         _membershipState.value = MembershipState.Member
-                        // Mettre à jour l'utilisateur localement
                         updateUserGroup(nomUtilisateur)
                     },
                     onFailure = {
@@ -83,7 +82,6 @@ class GroupeDetailViewModel(
                 result.fold(
                     onSuccess = {
                         _membershipState.value = MembershipState.NotMember
-                        // Mettre à jour l'utilisateur localement
                         updateUserGroup(nomUtilisateur)
                     },
                     onFailure = {
@@ -110,7 +108,6 @@ class GroupeDetailViewModel(
     private suspend fun updateUserGroup(nomUtilisateur: String) {
         utilisateurRepository.getUserByName(nomUtilisateur).collect { user ->
             if (user != null) {
-                // L'utilisateur a été mis à jour avec le nouveau groupe
             }
         }
     }
