@@ -48,6 +48,3 @@ Le code source est disponible ici pour ceux qui souhaitent voir comment nous avo
 
 Note : L'application nécessite une connexion internet pour interroger l'API de jeu.
 
-## Auteurs
-
-Projet réalisé par [Votre Nom] (Développement Android) et [Nom du collègue] (Backend & Base de données).
