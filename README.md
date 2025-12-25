@@ -1,110 +1,53 @@
-# SQLuedo - Tâches Restantes Avant Rendu Final
+# SQLuedo
 
-## 📋 Vue d'ensemble
+SQLuedo est une application Android née d'un constat simple en tant qu'étudiants : apprendre le SQL avec des exercices abstraits (clients, commandes, factures) peut vite devenir répétitif.
 
-Ce document énumère les fonctionnalités et corrections à implémenter avant le rendu final du projet SQLuedo, une application d'apprentissage SQL sous forme d'enquêtes.
+Nous avons voulu rendre l'apprentissage plus concret en gamifiant le processus. L'idée est de transformer la base de données en une scène de crime géante.
 
-## 🛠️ Corrections à apporter au code existant
+## Le concept
 
-### Navigation
-- Corriger l'implémentation de la navigation dans `Navigation.kt` :
- - Résoudre les problèmes de paramètres manquants dans `InformationsScreen`, `JeuScreen` et `ResultatScreen`
- - Mettre à jour la navigation pour utiliser la même structure que dans `Navigation.kt avec notation exacte`
- - Implémenter la gestion des arguments pour les enquêtes sélectionnées
+Le principe est celui d'un Cluedo numérique. L'utilisateur incarne un enquêteur qui doit résoudre des crimes. Mais ici, pas de dés ni de plateau : votre seul outil est le langage SQL.
 
+Concrètement, l'application propose :
+* Des scénarios d'enquêtes scriptés (vols, meurtres).
+* Une interface pour taper de vraies requêtes SQL directement sur mobile.
+* Un système de vérification qui analyse vos résultats pour voir si vous avez trouvé l'indice (l'arme, le lieu ou le suspect).
 
-## 🚀 Développement des fonctionnalités
+Si vous savez faire un `SELECT * FROM temoins WHERE lieu = 'Garage'`, vous pouvez commencer à jouer.
 
-### Repositories et ViewModels
-- Implémenter les repositories :
- - Compléter `GroupeRepository.java`
- - Compléter `StatistiquesRepository.java`
- - Compléter `UtilisateurRepository.java`
+## Fonctionnalités
 
-- Développer les ViewModels :
- - Implémenter `EnqueteListViewModel.kt`
- - Implémenter `EnqueteDetailViewModel.kt`
- - Implémenter `UserConnexionViewModel.kt`
- - Implémenter `UserInscriptionViewModel.kt`
- - Implémenter `GroupeListViewModel.kt`
- - Implémenter `GroupeDetailViewModel.kt`
- - Implémenter `CreateGroupeViewModel.kt`
+Au-delà du concept de jeu, l'application intègre plusieurs outils pédagogiques et techniques :
 
-### Fonctionnalités de l'application
-- Authentification :
- - Implémenter la logique de connexion utilisateur
- - Implémenter la logique d'inscription utilisateur
+**Côté Joueur :**
+* Éditeur SQL avec coloration syntaxique et retour d'erreur.
+* Progression par niveaux de difficulté.
+* Mode "Classe" pour rejoindre un groupe de TD et comparer son avancement avec les autres étudiants.
+* Statistiques détaillées (nombre de tentatives, temps de résolution).
 
-- Gestion des groupes :
- - Fonctionnalité pour créer un groupe
- - Fonctionnalité pour rejoindre un groupe
- - Fonctionnalité pour quitter un groupe
+**Côté Technique :**
+Le projet est découpé en deux parties distinctes :
+1. Une application mobile native (Android/Kotlin) qui gère l'interface et la logique de jeu.
+2. Une API REST en PHP qui fait l'intermédiaire sécurisé avec la base de données PostgreSQL.
 
-- Fonctionnalités de jeu :
- - Implémenter l'exécution des requêtes SQL
- - Créer le système de vérification des réponses
- - Ajouter des indicateurs de progression
+## Stack Technique
 
-- Statistiques :
- - Implémenter le suivi des tentatives
- - Implémenter le calcul du temps passé
- - Créer la visualisation des statistiques
+Ce projet a été réalisé dans le cadre d'une SAE (Situation d'Apprentissage et d'Évaluation) à l'IUT.
 
-### API et services
-- Connexion à l'API :
- - Remplacer `LienVersLApi` dans `ApiService.kt` par l'URL réelle
- - Compléter les endpoints API manquants
- - Implémenter l'intercepteur pour l'authentification
+* **Android** : Kotlin, Jetpack Compose pour l'UI, Coroutines pour l'asynchrone.
+* **Backend** : PHP natif (sans framework lourd pour la performance), architecture MVC.
+* **Base de données** : PostgreSQL.
 
-## 🧪 Tests et validation
+## Installation et test
 
-- Tests unitaires :
- - Ajouter des tests pour les ViewModels
- - Ajouter des tests pour les Repositories
+Le code source est disponible ici pour ceux qui souhaitent voir comment nous avons géré l'exécution de requêtes SQL arbitraires ou la gestion de l'état sous Jetpack Compose.
 
-- Tests d'interface :
- - Vérifier la compatibilité des interfaces sur différentes tailles d'écran
- - Tester les cas d'erreur (pas de connexion, échec d'authentification)
+1. Clonez ce dépôt.
+2. Ouvrez le projet sous Android Studio.
+3. Synchronisez le Gradle et lancez l'application sur un émulateur ou un device physique.
 
-## 📱 Optimisations
+Note : L'application nécessite une connexion internet pour interroger l'API de jeu.
 
-- Performance :
- - Gérer correctement le cycle de vie des composables
- - Optimiser les requêtes réseau avec la mise en cache
+## Auteurs
 
-- Interface utilisateur :
- - Uniformiser le style dans toute l'application
- - Ajouter des animations de transition entre les écrans
- - Améliorer l'accessibilité (taille des textes, contraste)
-
-## 🚧 Préparation au déploiement
-
-- Nettoyage du code :
- - Supprimer le code commenté inutile
- - Améliorer la documentation
- - Standardiser les conventions de nommage
-
-- Ressources :
- - Optimiser les ressources graphiques
- - Compléter les traductions dans `strings.xml`
-
-## 📆 Priorités suggérées
-
-1. **Haute priorité** : Corriger la navigation
-2. **Moyenne priorité** : Implémenter les repositories et ViewModels
-3. **Moyenne priorité** : Connecter l'application à l'API 
-4. **Basse priorité** : Optimisations et préparation au déploiement
-
----
-
-## 📊 Progression estimée
-
-| Catégorie | Progression |
-|-----------|-------------|
-| Navigation | 80% |
-| UI/UX | 95% |
-| Repositories | 10% |
-| ViewModels | 10% |
-| Services API | 40% |
-| Fonctionnalités de jeu | 50% |
-| Tests | 0% |
+Projet réalisé par [Votre Nom] (Développement Android) et [Nom du collègue] (Backend & Base de données).
